@@ -2,7 +2,6 @@
 
 namespace Olivermbs\LaravelEnumshare\Support;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
 use ReflectionClass;
@@ -13,28 +12,17 @@ class EnumAutoDiscovery
 {
     public function __construct(
         protected array $paths = [],
-        protected array $namespaces = [],
-        protected array $cacheConfig = []
+        protected array $namespaces = []
     ) {}
 
     public function discover(): array
     {
-        if ($this->isCacheEnabled()) {
-            return Cache::remember(
-                $this->getCacheKey(),
-                $this->getCacheTtl(),
-                fn () => $this->performDiscovery()
-            );
-        }
-
         return $this->performDiscovery();
     }
 
     public function clearCache(): void
     {
-        if ($this->isCacheEnabled()) {
-            Cache::forget($this->getCacheKey());
-        }
+        // No cache to clear - discovery is always fresh
     }
 
     protected function performDiscovery(): array
@@ -84,8 +72,8 @@ class EnumAutoDiscovery
         preg_match('/namespace\s+([^;]+);/', $content, $namespaceMatches);
         $namespace = $namespaceMatches[1] ?? '';
 
-        // Extract enum definitions
-        preg_match_all('/enum\s+(\w+)(?:\s*:\s*\w+)?\s+(?:implements\s+[^{]+)?\{/i', $content, $enumMatches);
+        // Extract enum definitions - handle multiline declarations
+        preg_match_all('/enum\s+(\w+)(?:\s*:\s*\w+)?(?:\s+implements\s+[^{]+)?\s*\{/ims', $content, $enumMatches);
 
         foreach ($enumMatches[1] as $enumName) {
             if ($namespace) {
@@ -141,18 +129,4 @@ class EnumAutoDiscovery
         return (bool) preg_match('/^'.$regexPattern.'$/i', $className);
     }
 
-    protected function isCacheEnabled(): bool
-    {
-        return $this->cacheConfig['enabled'] ?? false;
-    }
-
-    protected function getCacheKey(): string
-    {
-        return $this->cacheConfig['key'] ?? 'enumshare.discovered_enums';
-    }
-
-    protected function getCacheTtl(): int
-    {
-        return $this->cacheConfig['ttl'] ?? 3600;
-    }
 }

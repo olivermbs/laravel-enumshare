@@ -60,17 +60,8 @@ class EnumCommandsTest extends TestCase
     public function test_enums_clear_command_works(): void
     {
         $this->artisan('enums:clear')
-            ->expectsOutput('Cleared cached discovered enums.')
+            ->expectsOutput('No cache to clear - enum discovery is always fresh!')
             ->assertSuccessful();
-    }
-
-    public function test_enums_clear_command_fails_when_disabled(): void
-    {
-        config(['enumshare.autodiscovery.enabled' => false]);
-
-        $this->artisan('enums:clear')
-            ->expectsOutput('Enum autodiscovery is not enabled. Enable it in config/enumshare.php')
-            ->assertFailed();
     }
 
     public function test_enums_export_works_with_autodiscovery(): void

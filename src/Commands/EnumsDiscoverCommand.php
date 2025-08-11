@@ -22,8 +22,7 @@ class EnumsDiscoverCommand extends Command
 
         $discovery = new EnumAutoDiscovery(
             config('enumshare.autodiscovery.paths', []),
-            config('enumshare.autodiscovery.namespaces', []),
-            config('enumshare.autodiscovery.cache', [])
+            config('enumshare.autodiscovery.namespaces', [])
         );
 
         if ($this->option('clear')) {
@@ -51,9 +50,6 @@ class EnumsDiscoverCommand extends Command
             $this->line("  - {$enum}");
         }
 
-        if (config('enumshare.autodiscovery.cache.enabled', false)) {
-            $this->comment('Results cached for performance. Use --clear to refresh.');
-        }
 
         return self::SUCCESS;
     }

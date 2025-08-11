@@ -22,8 +22,7 @@ class LaravelEnumshareServiceProvider extends ServiceProvider
         $this->app->singleton(EnumAutoDiscovery::class, function ($app) {
             return new EnumAutoDiscovery(
                 config('enumshare.autodiscovery.paths', []),
-                config('enumshare.autodiscovery.namespaces', []),
-                config('enumshare.autodiscovery.cache', [])
+                config('enumshare.autodiscovery.namespaces', [])
             );
         });
 

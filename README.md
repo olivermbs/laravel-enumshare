@@ -7,13 +7,6 @@
 
 Export PHP Enums to TypeScript/Inertia with labels, metadata, and type-safe frontend access. Generate JSON manifests and TypeScript definitions for seamless enum sharing between Laravel backends and frontend applications.
 
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/laravel-enumshare.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/laravel-enumshare)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
 
 ## Installation
 
@@ -198,7 +191,7 @@ import { getEnum, getAllEnums } from '@/enums/EnumRuntime';
 // Get a specific enum (provide manifest on first call)
 const TripStatus = getEnum('TripStatus', manifest);
 
-// Subsequent calls don't need manifest (cached)
+// Subsequent calls don't need manifest (helper caches internally)
 const UserRole = getEnum('UserRole');
 
 // Get all enums at once
@@ -290,24 +283,14 @@ Instead of manually configuring each enum, you can enable auto-discovery to auto
         'App\\Enums\\*',
         'App\\Domain\\*\\Enums\\*',
     ],
-    'cache' => [
-        'enabled' => true,
-        'ttl' => 3600, // 1 hour
-    ],
 ],
 ```
 
 ### Discovery Commands
 
 ```bash
-# Discover enums and show what was found
+# Discover enums and show what was found (always fresh - no caching)
 php artisan enums:discover
-
-# Clear discovery cache and rediscover
-php artisan enums:discover --clear
-
-# Clear discovery cache only
-php artisan enums:clear
 ```
 
 ### How It Works
@@ -315,17 +298,13 @@ php artisan enums:clear
 1. **Path Scanning**: Scans configured directories for PHP files containing enums
 2. **Interface Validation**: Only includes enums implementing `FrontendEnum` contract
 3. **Namespace Filtering**: Applies glob-style namespace patterns for inclusion
-4. **Caching**: Caches discovered enums for performance (configurable TTL)
-5. **Combination**: Merges discovered enums with manually configured ones
+4. **Combination**: Merges discovered enums with manually configured ones
 
 ### Environment Variables
 
 ```bash
 # Enable/disable autodiscovery
 ENUMSHARE_AUTODISCOVERY=true
-
-# Enable/disable caching
-ENUMSHARE_CACHE=true
 ```
 
 ## Testing

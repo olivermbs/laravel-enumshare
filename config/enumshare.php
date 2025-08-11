@@ -69,7 +69,7 @@ return [
         /*
         | Enable or disable enum autodiscovery
         */
-        'enabled' => env('ENUMSHARE_AUTODISCOVERY', false),
+        'enabled' => env('ENUMSHARE_AUTODISCOVERY', true),
 
         /*
         | Paths to scan for enums (relative to base_path())
@@ -90,15 +90,6 @@ return [
             // 'App\\Domain\\*\\Enums\\*',
         ],
 
-        /*
-        | Cache discovered enums for performance
-        | Cached enums are stored until explicitly cleared
-        */
-        'cache' => [
-            'enabled' => env('ENUMSHARE_CACHE', true),
-            'key' => 'enumshare.discovered_enums',
-            'ttl' => 3600, // 1 hour in seconds
-        ],
     ],
 
     /*

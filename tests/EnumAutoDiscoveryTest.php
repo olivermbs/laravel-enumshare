@@ -44,7 +44,7 @@ class EnumAutoDiscoveryTest extends TestCase
     {
         $this->createTestEnumFile('TestStatus', 'App\\TestEnums');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], [], []);
+        $discovery = new EnumAutoDiscovery(['test_enums'], []);
         $discoveredEnums = $discovery->discover();
 
         expect($discoveredEnums)->toContain('App\\TestEnums\\TestStatus');
@@ -55,7 +55,7 @@ class EnumAutoDiscoveryTest extends TestCase
         $this->createTestEnumFile('AllowedEnum', 'App\\Enums');
         $this->createTestEnumFile('BlockedEnum', 'App\\Models');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], ['App\\Enums\\*'], []);
+        $discovery = new EnumAutoDiscovery(['test_enums'], ['App\\Enums\\*']);
         $discoveredEnums = $discovery->discover();
 
         expect($discoveredEnums)
@@ -63,47 +63,23 @@ class EnumAutoDiscoveryTest extends TestCase
             ->not->toContain('App\\Models\\BlockedEnum');
     }
 
-    public function test_caches_discovered_enums_when_enabled(): void
+    public function test_always_discovers_fresh_enums(): void
     {
-        $this->createTestEnumFile('CachedEnum', 'App\\Enums');
+        $this->createTestEnumFile('FreshEnum', 'App\\Enums');
 
-        $cacheConfig = [
-            'enabled' => true,
-            'key' => 'test.discovered_enums',
-            'ttl' => 3600,
-        ];
+        $discovery = new EnumAutoDiscovery(['test_enums'], []);
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], [], $cacheConfig);
-
-        // First call should discover and cache
+        // First call
         $firstCall = $discovery->discover();
-        expect(Cache::has('test.discovered_enums'))->toBeTrue();
+        expect($firstCall)->toContain('App\\Enums\\FreshEnum');
 
-        // Delete the file to test cache is being used
-        File::delete($this->testEnumsPath.'/CachedEnum.php');
+        // Add another enum
+        $this->createTestEnumFile('AnotherFreshEnum', 'App\\Enums');
 
-        // Second call should return cached result
+        // Second call should include the new enum (no caching)
         $secondCall = $discovery->discover();
-        expect($secondCall)->toEqual($firstCall);
-    }
-
-    public function test_clears_cached_enums(): void
-    {
-        $cacheConfig = [
-            'enabled' => true,
-            'key' => 'test.discovered_enums',
-            'ttl' => 3600,
-        ];
-
-        $discovery = new EnumAutoDiscovery(['test_enums'], [], $cacheConfig);
-
-        // Cache some data
-        Cache::put('test.discovered_enums', ['SomeEnum'], 3600);
-        expect(Cache::has('test.discovered_enums'))->toBeTrue();
-
-        // Clear cache
-        $discovery->clearCache();
-        expect(Cache::has('test.discovered_enums'))->toBeFalse();
+        expect($secondCall)->toContain('App\\Enums\\FreshEnum')
+            ->and($secondCall)->toContain('App\\Enums\\AnotherFreshEnum');
     }
 
     public function test_skips_invalid_enums(): void
@@ -113,7 +89,7 @@ class EnumAutoDiscoveryTest extends TestCase
         // Create an enum that doesn't implement FrontendEnum
         $this->createInvalidEnumFile('InvalidEnum', 'App\\Enums');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], [], []);
+        $discovery = new EnumAutoDiscovery(['test_enums'], []);
         $discoveredEnums = $discovery->discover();
 
         expect($discoveredEnums)
@@ -125,7 +101,7 @@ class EnumAutoDiscoveryTest extends TestCase
     {
         $this->createTestEnumFile('RegistryTestEnum', 'App\\Enums');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], [], []);
+        $discovery = new EnumAutoDiscovery(['test_enums'], []);
         $registry = new EnumRegistry([], $discovery);
 
         // Enable autodiscovery in config
@@ -144,7 +120,7 @@ class EnumAutoDiscoveryTest extends TestCase
         // Create a configured enum (defined in test)
         $configuredEnums = [TestConfiguredEnum::class];
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], [], []);
+        $discovery = new EnumAutoDiscovery(['test_enums'], []);
         $registry = new EnumRegistry($configuredEnums, $discovery);
 
         config(['enumshare.autodiscovery.enabled' => true]);
