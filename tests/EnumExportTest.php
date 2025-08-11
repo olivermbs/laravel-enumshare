@@ -163,16 +163,16 @@ class EnumExportTest extends TestCase
     public function test_translated_label_with_multiple_locales(): void
     {
         // Create translation files for testing
-        $this->app['path.lang'] = __DIR__ . '/lang';
+        $this->app['path.lang'] = __DIR__.'/lang';
         foreach (['en', 'fr', 'es'] as $locale) {
-            if (!is_dir(__DIR__ . "/lang/{$locale}")) {
-                mkdir(__DIR__ . "/lang/{$locale}", 0755, true);
+            if (! is_dir(__DIR__."/lang/{$locale}")) {
+                mkdir(__DIR__."/lang/{$locale}", 0755, true);
             }
         }
-        
-        file_put_contents(__DIR__ . '/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
-        file_put_contents(__DIR__ . '/lang/fr/orders.php', "<?php return ['pending' => 'Commande en attente'];");
-        file_put_contents(__DIR__ . '/lang/es/orders.php', "<?php return ['pending' => 'Pedido pendiente'];");
+
+        file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
+        file_put_contents(__DIR__.'/lang/fr/orders.php', "<?php return ['pending' => 'Commande en attente'];");
+        file_put_contents(__DIR__.'/lang/es/orders.php', "<?php return ['pending' => 'Pedido pendiente'];");
 
         config(['enumshare.export.locales' => ['en', 'fr', 'es']]);
 
@@ -185,23 +185,23 @@ class EnumExportTest extends TestCase
             ->and($pendingEntry['label']['en'])->toBe('Pending Order')
             ->and($pendingEntry['label']['fr'])->toBe('Commande en attente')
             ->and($pendingEntry['label']['es'])->toBe('Pedido pendiente');
-            
+
         // Cleanup
         foreach (['en', 'fr', 'es'] as $locale) {
-            @unlink(__DIR__ . "/lang/{$locale}/orders.php");
-            @rmdir(__DIR__ . "/lang/{$locale}");
+            @unlink(__DIR__."/lang/{$locale}/orders.php");
+            @rmdir(__DIR__."/lang/{$locale}");
         }
-        @rmdir(__DIR__ . '/lang');
+        @rmdir(__DIR__.'/lang');
     }
 
     public function test_translated_label_with_parameters(): void
     {
         // Create translation files for testing
-        $this->app['path.lang'] = __DIR__ . '/lang';
-        if (!is_dir(__DIR__ . '/lang/en')) {
-            mkdir(__DIR__ . '/lang/en', 0755, true);
+        $this->app['path.lang'] = __DIR__.'/lang';
+        if (! is_dir(__DIR__.'/lang/en')) {
+            mkdir(__DIR__.'/lang/en', 0755, true);
         }
-        file_put_contents(__DIR__ . '/lang/en/orders.php', "<?php return ['confirmed' => 'Confirmed :status Order'];");
+        file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['confirmed' => 'Confirmed :status Order'];");
 
         config(['enumshare.export.locales' => ['en']]);
 
@@ -211,21 +211,21 @@ class EnumExportTest extends TestCase
         expect($confirmedEntry['label'])
             ->toBeArray()
             ->and($confirmedEntry['label']['en'])->toBe('Confirmed active Order');
-            
+
         // Cleanup
-        @unlink(__DIR__ . '/lang/en/orders.php');
-        @rmdir(__DIR__ . '/lang/en');
-        @rmdir(__DIR__ . '/lang');
+        @unlink(__DIR__.'/lang/en/orders.php');
+        @rmdir(__DIR__.'/lang/en');
+        @rmdir(__DIR__.'/lang');
     }
 
     public function test_translated_label_fallback_to_single_locale_when_no_locales_configured(): void
     {
         // Create translation files for testing
-        $this->app['path.lang'] = __DIR__ . '/lang';
-        if (!is_dir(__DIR__ . '/lang/en')) {
-            mkdir(__DIR__ . '/lang/en', 0755, true);
+        $this->app['path.lang'] = __DIR__.'/lang';
+        if (! is_dir(__DIR__.'/lang/en')) {
+            mkdir(__DIR__.'/lang/en', 0755, true);
         }
-        file_put_contents(__DIR__ . '/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
+        file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
 
         config(['app.locale' => 'en']);
         config(['enumshare.export.locales' => []]);
@@ -234,21 +234,21 @@ class EnumExportTest extends TestCase
         $pendingEntry = collect($result['entries'])->firstWhere('key', 'Pending');
 
         expect($pendingEntry['label'])->toBe('Pending Order');
-        
+
         // Cleanup
-        @unlink(__DIR__ . '/lang/en/orders.php');
-        @rmdir(__DIR__ . '/lang/en');
-        @rmdir(__DIR__ . '/lang');
+        @unlink(__DIR__.'/lang/en/orders.php');
+        @rmdir(__DIR__.'/lang/en');
+        @rmdir(__DIR__.'/lang');
     }
 
     public function test_mixed_label_types_in_same_enum(): void
     {
         // Create translation files for testing
-        $this->app['path.lang'] = __DIR__ . '/lang';
-        if (!is_dir(__DIR__ . '/lang/en')) {
-            mkdir(__DIR__ . '/lang/en', 0755, true);
+        $this->app['path.lang'] = __DIR__.'/lang';
+        if (! is_dir(__DIR__.'/lang/en')) {
+            mkdir(__DIR__.'/lang/en', 0755, true);
         }
-        file_put_contents(__DIR__ . '/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
+        file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
 
         config(['enumshare.export.locales' => ['en']]);
 
@@ -260,21 +260,21 @@ class EnumExportTest extends TestCase
             ->toBeArray()
             ->and($pendingEntry['label']['en'])->toBe('Pending Order')
             ->and($cancelledEntry['label'])->toBe('Cancelled');
-            
+
         // Cleanup
-        @unlink(__DIR__ . '/lang/en/orders.php');
-        @rmdir(__DIR__ . '/lang/en');
-        @rmdir(__DIR__ . '/lang');
+        @unlink(__DIR__.'/lang/en/orders.php');
+        @rmdir(__DIR__.'/lang/en');
+        @rmdir(__DIR__.'/lang');
     }
 
     public function test_options_use_string_labels_for_translated_labels(): void
     {
         // Create translation files for testing
-        $this->app['path.lang'] = __DIR__ . '/lang';
-        if (!is_dir(__DIR__ . '/lang/en')) {
-            mkdir(__DIR__ . '/lang/en', 0755, true);
+        $this->app['path.lang'] = __DIR__.'/lang';
+        if (! is_dir(__DIR__.'/lang/en')) {
+            mkdir(__DIR__.'/lang/en', 0755, true);
         }
-        file_put_contents(__DIR__ . '/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
+        file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
 
         config(['app.locale' => 'en']);
         config(['enumshare.export.locales' => ['en']]);
@@ -283,11 +283,11 @@ class EnumExportTest extends TestCase
         $pendingOption = collect($result['options'])->firstWhere('value', 'pending');
 
         expect($pendingOption['label'])->toBe('Pending Order');
-        
+
         // Cleanup
-        @unlink(__DIR__ . '/lang/en/orders.php');
-        @rmdir(__DIR__ . '/lang/en');
-        @rmdir(__DIR__ . '/lang');
+        @unlink(__DIR__.'/lang/en/orders.php');
+        @rmdir(__DIR__.'/lang/en');
+        @rmdir(__DIR__.'/lang');
     }
 
     public function getEnvironmentSetUp($app): void
