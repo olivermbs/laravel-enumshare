@@ -51,22 +51,36 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
 
   // Add the from method explicitly to avoid conflicts
   const findEntryByValue = (value: string | number) => {
-    const entry = enumData.entries.find(entry =>
-      (entry.value !== null ? entry.value : entry.key) === value
-    );
-    return entry || null;
+    // Handle null/undefined gracefully
+    if (value === null || value === undefined) {
+      return null;
+    }
+    
+    try {
+      const entry = enumData.entries.find(entry =>
+        (entry.value !== null ? entry.value : entry.key) === value
+      );
+      return entry || null;
+    } catch (error) {
+      // Silently handle any errors and return null
+      return null;
+    }
   };
 
   baseObject.from = findEntryByValue;
 
   // Create proxy to handle dynamic property access
-  // @ts-ignore
-    return new Proxy(baseObject, {
+  return new Proxy(baseObject, {
     get(target: any, prop: string | symbol) {
-      if (typeof prop === 'string' && entriesMap[prop]) {
-        return entriesMap[prop];
+      try {
+        if (typeof prop === 'string' && entriesMap[prop]) {
+          return entriesMap[prop];
+        }
+        return target[prop];
+      } catch (error) {
+        // Silently handle any proxy errors
+        return undefined;
       }
-      return target[prop];
     },
 
     has(target: any, prop: string | symbol) {
