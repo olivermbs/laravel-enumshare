@@ -23,12 +23,11 @@ You can install the package via composer:
 composer require 37539998-olivermbs/laravel-enumshare
 ```
 
-Publish the configuration file, TypeScript runtime, and Vite plugin:
+Publish the configuration file and TypeScript runtime:
 
 ```bash
 php artisan vendor:publish --tag="enumshare-config"
 php artisan vendor:publish --tag="enumshare-stubs"
-php artisan vendor:publish --tag="enumshare-vite"
 ```
 
 ## Quickstart
@@ -84,15 +83,21 @@ return [
 ];
 ```
 
-### 3. Setup Vite Integration (Optional but Recommended)
+### 3. Setup Auto-Regeneration (Optional but Recommended)
 
-Add the Vite plugin to automatically regenerate enums during development:
+**Option A: Vite Wayfinder (Recommended)**
+
+Install Laravel's Vite Wayfinder to automatically regenerate enums when files change:
+
+```bash
+npm install --save-dev @laravel/vite-plugin-wayfinder
+```
 
 ```javascript
 // vite.config.js
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import { laravelEnums } from './vite-plugin-laravel-enums.js';
+import wayfinder from '@laravel/vite-plugin-wayfinder';
 
 export default defineConfig({
   plugins: [
@@ -100,9 +105,25 @@ export default defineConfig({
       input: ['resources/css/app.css', 'resources/js/app.js'],
       refresh: true,
     }),
-    laravelEnums(),
+    wayfinder({
+      'app/Enums/**/*.php': 'php artisan enums:export',
+      'lang/*/enums.php': 'php artisan enums:export',
+      'config/enumshare.php': 'php artisan enums:export',
+    }),
   ],
 });
+```
+
+**Option B: Manual Watch Command**
+
+Run the watch command alongside your dev server:
+
+```bash
+# Terminal 1
+npm run dev
+
+# Terminal 2  
+php artisan enums:watch
 ```
 
 ### 4. Export Enums
@@ -118,7 +139,7 @@ This creates:
 - `resources/js/enums/enums.generated.d.ts` - TypeScript definitions
 - `resources/js/enums/{EnumName}.ts` - Individual importable enum files
 
-With the Vite plugin, this happens automatically when you change enum files!
+With Vite Wayfinder, this happens automatically when you change enum files!
 
 ### 5. Use in Frontend
 
@@ -192,18 +213,21 @@ const allEnums = getAllEnums(manifest);
 import { TripStatus } from '@/enums/TripStatus';
 ```
 
-### Vite Integration
+### Vite Wayfinder Integration
 
-🔥 **Automatic regeneration** during development! The Vite plugin:
+🔥 **Automatic regeneration** during development using Laravel's Vite Wayfinder:
 
 - **Watches enum files** - Auto-regenerates when you change PHP enums
 - **Watches translations** - Updates when you change `lang/*/enums.php` files  
-- **Hot Module Replacement** - Frontend updates instantly without browser refresh
-- **Build integration** - Ensures enums are generated before production builds
+- **File pattern matching** - Precise control over what triggers regeneration
+- **Official Laravel plugin** - Built and maintained by the Laravel team
 
 ```javascript
-// vite.config.js - Just add the plugin!
-laravelEnums() // That's it!
+// vite.config.js - Configure file patterns to watch
+wayfinder({
+  'app/Enums/**/*.php': 'php artisan enums:export',
+  'lang/*/enums.php': 'php artisan enums:export',
+})
 ```
 
 ### Attributes
@@ -229,7 +253,7 @@ Labels are resolved in this priority order:
 ### CLI Commands
 
 ```bash
-# Export enums (run manually or via Vite plugin)
+# Export enums (run manually or via Vite Wayfinder)
 php artisan enums:export
 
 # Export for specific locale
