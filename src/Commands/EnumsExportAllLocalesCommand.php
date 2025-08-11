@@ -17,7 +17,7 @@ class EnumsExportAllLocalesCommand extends Command
     public function handle(EnumRegistry $registry): int
     {
         $locales = $this->option('locales') ?: $this->getConfiguredLocales();
-        $basePath = $this->option('base-path') ?: config('enumshare.export.path');
+        $basePath = $this->option('base-path') ?: config('enumshare.export.path', resource_path('js/enums'));
 
         if (empty($locales)) {
             $this->warn('No locales configured. Add locales to config or use --locales option.');

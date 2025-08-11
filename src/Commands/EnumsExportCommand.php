@@ -17,7 +17,7 @@ class EnumsExportCommand extends Command
     public function handle(EnumRegistry $registry): int
     {
         $locale = $this->option('locale') ?? config('enumshare.export.locale');
-        $enumsDir = $this->option('path') ?? config('enumshare.export.path');
+        $enumsDir = $this->option('path') ?? config('enumshare.export.path', resource_path('js/enums'));
 
         $this->info('Generating enum manifest...');
 
