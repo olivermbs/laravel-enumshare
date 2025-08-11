@@ -50,7 +50,6 @@ class EnumsDiscoverCommand extends Command
             $this->line("  - {$enum}");
         }
 
-
         return self::SUCCESS;
     }
 }

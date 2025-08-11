@@ -128,5 +128,4 @@ class EnumAutoDiscovery
 
         return (bool) preg_match('/^'.$regexPattern.'$/i', $className);
     }
-
 }
