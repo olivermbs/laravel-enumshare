@@ -44,30 +44,30 @@ class EnumAutoDiscoveryTest extends TestCase
     {
         $this->createTestEnumFile('TestStatus', 'App\\TestEnums');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], []);
+        $discovery = new EnumAutoDiscovery(['test_enums']);
         $discoveredEnums = $discovery->discover();
 
         expect($discoveredEnums)->toContain('App\\TestEnums\\TestStatus');
     }
 
-    public function test_filters_enums_by_namespace_patterns(): void
+    public function test_discovers_all_valid_enums_in_paths(): void
     {
-        $this->createTestEnumFile('AllowedEnum', 'App\\Enums');
-        $this->createTestEnumFile('BlockedEnum', 'App\\Models');
+        $this->createTestEnumFile('FirstEnum', 'App\\Enums');
+        $this->createTestEnumFile('SecondEnum', 'App\\Models');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], ['App\\Enums\\*']);
+        $discovery = new EnumAutoDiscovery(['test_enums']);
         $discoveredEnums = $discovery->discover();
 
         expect($discoveredEnums)
-            ->toContain('App\\Enums\\AllowedEnum')
-            ->not->toContain('App\\Models\\BlockedEnum');
+            ->toContain('App\\Enums\\FirstEnum')
+            ->and($discoveredEnums)->toContain('App\\Models\\SecondEnum');
     }
 
     public function test_always_discovers_fresh_enums(): void
     {
         $this->createTestEnumFile('FreshEnum', 'App\\Enums');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], []);
+        $discovery = new EnumAutoDiscovery(['test_enums']);
 
         // First call
         $firstCall = $discovery->discover();
@@ -89,7 +89,7 @@ class EnumAutoDiscoveryTest extends TestCase
         // Create an enum that doesn't implement FrontendEnum
         $this->createInvalidEnumFile('InvalidEnum', 'App\\Enums');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], []);
+        $discovery = new EnumAutoDiscovery(['test_enums']);
         $discoveredEnums = $discovery->discover();
 
         expect($discoveredEnums)
@@ -101,7 +101,7 @@ class EnumAutoDiscoveryTest extends TestCase
     {
         $this->createTestEnumFile('RegistryTestEnum', 'App\\Enums');
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], []);
+        $discovery = new EnumAutoDiscovery(['test_enums']);
         $registry = new EnumRegistry([], $discovery);
 
         // Enable autodiscovery in config
@@ -120,7 +120,7 @@ class EnumAutoDiscoveryTest extends TestCase
         // Create a configured enum (defined in test)
         $configuredEnums = [TestConfiguredEnum::class];
 
-        $discovery = new EnumAutoDiscovery(['test_enums'], []);
+        $discovery = new EnumAutoDiscovery(['test_enums']);
         $registry = new EnumRegistry($configuredEnums, $discovery);
 
         config(['enumshare.autodiscovery.enabled' => true]);

@@ -7,8 +7,7 @@ use Olivermbs\LaravelEnumshare\Support\EnumAutoDiscovery;
 
 class EnumsDiscoverCommand extends Command
 {
-    protected $signature = 'enums:discover 
-                            {--clear : Clear cached discovered enums first}';
+    protected $signature = 'enums:discover';
 
     protected $description = 'Discover enums that implement the FrontendEnum contract';
 
@@ -21,14 +20,8 @@ class EnumsDiscoverCommand extends Command
         }
 
         $discovery = new EnumAutoDiscovery(
-            config('enumshare.autodiscovery.paths', []),
-            config('enumshare.autodiscovery.namespaces', [])
+            config('enumshare.autodiscovery.paths', [])
         );
-
-        if ($this->option('clear')) {
-            $this->info('Clearing cached discovered enums...');
-            $discovery->clearCache();
-        }
 
         $this->info('Discovering enums...');
 

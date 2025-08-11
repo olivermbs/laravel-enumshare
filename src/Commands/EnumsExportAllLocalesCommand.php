@@ -17,7 +17,7 @@ class EnumsExportAllLocalesCommand extends Command
     public function handle(EnumRegistry $registry): int
     {
         $locales = $this->option('locales') ?: $this->getConfiguredLocales();
-        $basePath = $this->option('base-path') ?: dirname(config('enumshare.export.json_path'));
+        $basePath = $this->option('base-path') ?: config('enumshare.export.path');
 
         if (empty($locales)) {
             $this->warn('No locales configured. Add locales to config or use --locales option.');
@@ -31,8 +31,6 @@ class EnumsExportAllLocalesCommand extends Command
             $this->info("Generating for locale: {$locale}");
 
             $localeDir = "{$basePath}/{$locale}";
-            $jsonPath = "{$localeDir}/enums.generated.json";
-            $typesPath = "{$localeDir}/enums.generated.d.ts";
 
             $manifest = $registry->manifest($locale);
 
@@ -42,11 +40,8 @@ class EnumsExportAllLocalesCommand extends Command
                 continue;
             }
 
-            $this->ensureDirectoryExists($jsonPath);
-            $this->ensureDirectoryExists($typesPath);
+            $this->ensureDirectoryExists($localeDir);
 
-            $this->writeJsonManifest($manifest, $jsonPath);
-            $this->writeTypeScriptDefinitions($manifest, $typesPath);
             $this->writeIndividualEnumFiles($manifest, $localeDir, $locale);
 
             $enumCount = count($manifest);
@@ -67,33 +62,13 @@ class EnumsExportAllLocalesCommand extends Command
         ]);
     }
 
-    protected function ensureDirectoryExists(string $filePath): void
+    protected function ensureDirectoryExists(string $directory): void
     {
-        $directory = dirname($filePath);
-
         if (! File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
     }
 
-    protected function writeJsonManifest(array $manifest, string $path): void
-    {
-        $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        File::put($path, $json);
-    }
-
-    protected function writeTypeScriptDefinitions(array $manifest, string $path): void
-    {
-        $content = "// This file is auto-generated. Do not edit manually.\n\n";
-
-        foreach ($manifest as $enumName => $enumData) {
-            $content .= $this->generateEnumTypes($enumName, $enumData);
-        }
-
-        $content .= $this->generateEnumsMapType($manifest);
-
-        File::put($path, $content);
-    }
 
     protected function writeIndividualEnumFiles(array $manifest, string $enumsDir, string $locale): void
     {
@@ -104,62 +79,6 @@ class EnumsExportAllLocalesCommand extends Command
         }
     }
 
-    protected function generateEnumTypes(string $enumName, array $enumData): string
-    {
-        $keys = array_map(fn ($entry) => "'{$entry['key']}'", $enumData['entries']);
-        $keyUnion = implode(' | ', $keys);
-
-        if ($enumData['backingType'] === 'string') {
-            $values = array_map(fn ($entry) => "'{$entry['value']}'", $enumData['entries']);
-        } elseif ($enumData['backingType'] === 'int') {
-            $values = array_map(fn ($entry) => $entry['value'], $enumData['entries']);
-        } else {
-            $values = $keys;
-        }
-        $valueUnion = implode(' | ', $values);
-
-        $content = "export type {$enumName}Key = {$keyUnion};\n";
-        $content .= "export type {$enumName}Value = {$valueUnion};\n\n";
-
-        $content .= "export interface {$enumName}Entry {\n";
-        $content .= "  key: {$enumName}Key;\n";
-        $content .= '  value: '.($enumData['backingType'] ? "{$enumName}Value" : 'null').";\n";
-        $content .= "  label: string;\n";
-        $content .= "  meta: Record<string, any>;\n";
-        $content .= "}\n\n";
-
-        $content .= "export interface {$enumName}Option {\n";
-        $content .= "  value: {$enumName}Value;\n";
-        $content .= "  label: string;\n";
-        $content .= "}\n\n";
-
-        $entryRecord = "Record<{$enumName}Key, {$enumName}Entry>";
-        $content .= "declare const {$enumName}: {$entryRecord} & {\n";
-        $content .= "  name: string;\n";
-        $content .= "  entries: {$enumName}Entry[];\n";
-        $content .= "  options: {$enumName}Option[];\n";
-        $content .= "  keys(): {$enumName}Key[];\n";
-        $content .= "  values(): {$enumName}Value[];\n";
-        $content .= "  labels(): string[];\n";
-        $content .= "};\n\n";
-
-        return $content;
-    }
-
-    protected function generateEnumsMapType(array $manifest): string
-    {
-        $enumNames = array_keys($manifest);
-        $enumTypes = array_map(fn ($name) => "  {$name}: typeof {$name};", $enumNames);
-
-        $content = "export interface EnumsMap {\n";
-        $content .= implode("\n", $enumTypes)."\n";
-        $content .= "}\n\n";
-
-        $content .= "declare const Enums: EnumsMap;\n";
-        $content .= "export default Enums;\n";
-
-        return $content;
-    }
 
     protected function generateIndividualEnumFile(string $enumName, array $enumData, string $locale): string
     {

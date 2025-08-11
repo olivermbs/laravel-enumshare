@@ -1,18 +1,6 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Export Strategy
-    |--------------------------------------------------------------------------
-    |
-    | Determines how enums are shared with the frontend:
-    | - 'export': Build-time export to JSON + TypeScript definitions
-    | - 'inertia': Runtime sharing via Inertia middleware (future)
-    | - 'both': Both strategies enabled (future)
-    |
-    */
-    'strategy' => env('ENUMSHARE_STRATEGY', 'export'),
 
     /*
     |--------------------------------------------------------------------------
@@ -39,14 +27,9 @@ return [
     */
     'export' => [
         /*
-        | Path where the generated JSON manifest will be written
+        | Path where the enum files will be written
         */
-        'json_path' => resource_path('js/enums/enums.generated.json'),
-
-        /*
-        | Path where the generated TypeScript definitions will be written
-        */
-        'types_path' => resource_path('js/enums/enums.generated.d.ts'),
+        'path' => resource_path('js/enums'),
 
         /*
         | Default locale for label generation
@@ -81,14 +64,6 @@ return [
             // 'src/Domain/*/Enums',
         ],
 
-        /*
-        | Namespace patterns to include when scanning
-        | Uses glob-style patterns: App\Enums\*, App\Domain\*\Enums\*
-        */
-        'namespaces' => [
-            'App\\Enums\\*',
-            // 'App\\Domain\\*\\Enums\\*',
-        ],
 
     ],
 

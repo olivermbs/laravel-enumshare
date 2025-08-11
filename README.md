@@ -68,8 +68,7 @@ return [
         App\Enums\UserRole::class,
     ],
     'export' => [
-        'json_path' => resource_path('js/enums/enums.generated.json'),
-        'types_path' => resource_path('js/enums/enums.generated.d.ts'),
+        'path' => resource_path('js/enums'),
         'locale' => null,
     ],
     'lang_namespace' => 'enums',
@@ -130,16 +129,14 @@ Run the export command to generate JSON manifest and TypeScript definitions:
 php artisan enums:export
 ```
 
-This creates:
-- `resources/js/enums/enums.generated.json` - The enum data
-- `resources/js/enums/enums.generated.d.ts` - TypeScript definitions
-- `resources/js/enums/{EnumName}.ts` - Individual importable enum files
+This creates individual TypeScript files:
+- `resources/js/enums/TripStatus.ts` - Direct importable enum
+- `resources/js/enums/UserRole.ts` - Direct importable enum
+- `resources/js/enums/FlightBriefingStatus.ts` - Direct importable enum
 
 With Vite Wayfinder, this happens automatically when you change enum files!
 
 ### 5. Use in Frontend
-
-#### Option A: Direct Import (Recommended)
 
 Import individual enums directly - no setup required:
 
@@ -163,39 +160,6 @@ console.log(TripStatus.options);             // [{ value: 'saved', label: 'Trip 
 if (order.status === TripStatus.Confirmed.value) {
     // Handle confirmed order
 }
-```
-
-#### Option B: Bulk Import
-
-For legacy code or if you prefer the original approach:
-
-```typescript
-import manifest from '@/enums/enums.generated.json';
-import { buildEnums } from '@/enums/EnumRuntime';
-
-export const Enums = buildEnums(manifest);
-const { TripStatus } = Enums;
-
-// Same API as Option A
-console.log(TripStatus.Saved.value);
-```
-
-#### Option C: Helper Functions
-
-Use the new helper functions for dynamic access:
-
-```typescript
-import manifest from '@/enums/enums.generated.json';
-import { getEnum, getAllEnums } from '@/enums/EnumRuntime';
-
-// Get a specific enum (provide manifest on first call)
-const TripStatus = getEnum('TripStatus', manifest);
-
-// Subsequent calls don't need manifest (helper caches internally)
-const UserRole = getEnum('UserRole');
-
-// Get all enums at once
-const allEnums = getAllEnums(manifest);
 ```
 
 ## Features
@@ -252,7 +216,7 @@ Labels are resolved in this priority order:
 ### CLI Commands
 
 ```bash
-# Export enums (run manually or via Vite Wayfinder)
+# Export enums to TypeScript files
 php artisan enums:export
 
 # Export for specific locale
@@ -261,7 +225,7 @@ php artisan enums:export --locale=es
 # Export all locales at once
 php artisan enums:export-all-locales
 
-# Discover enums (with autodiscovery enabled)
+# Discover enums (always fresh - no caching)
 php artisan enums:discover
 ```
 
@@ -279,10 +243,6 @@ Instead of manually configuring each enum, you can enable auto-discovery to auto
         'app/Enums',
         'app/Domain/*/Enums',
     ],
-    'namespaces' => [
-        'App\\Enums\\*',
-        'App\\Domain\\*\\Enums\\*',
-    ],
 ],
 ```
 
@@ -297,8 +257,7 @@ php artisan enums:discover
 
 1. **Path Scanning**: Scans configured directories for PHP files containing enums
 2. **Interface Validation**: Only includes enums implementing `FrontendEnum` contract
-3. **Namespace Filtering**: Applies glob-style namespace patterns for inclusion
-4. **Combination**: Merges discovered enums with manually configured ones
+3. **Combination**: Merges discovered enums with manually configured ones
 
 ### Environment Variables
 

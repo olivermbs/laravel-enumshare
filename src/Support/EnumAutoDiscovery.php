@@ -11,8 +11,7 @@ use Symfony\Component\Finder\Finder;
 class EnumAutoDiscovery
 {
     public function __construct(
-        protected array $paths = [],
-        protected array $namespaces = []
+        protected array $paths = []
     ) {}
 
     public function discover(): array
@@ -54,7 +53,7 @@ class EnumAutoDiscovery
             $enumClasses = $this->extractEnumClassesFromFile($file->getRealPath());
 
             foreach ($enumClasses as $enumClass) {
-                if ($this->isValidFrontendEnum($enumClass) && $this->matchesNamespacePatterns($enumClass)) {
+                if ($this->isValidFrontendEnum($enumClass)) {
                     $enums[] = $enumClass;
                 }
             }
@@ -102,30 +101,5 @@ class EnumAutoDiscovery
         }
     }
 
-    protected function matchesNamespacePatterns(string $enumClass): bool
-    {
-        if (empty($this->namespaces)) {
-            return true;
-        }
 
-        foreach ($this->namespaces as $pattern) {
-            if ($this->matchesPattern($enumClass, $pattern)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    protected function matchesPattern(string $className, string $pattern): bool
-    {
-        // Convert glob-style pattern to regex
-        $regexPattern = str_replace(
-            ['\\', '*', '?'],
-            ['\\\\', '.*', '.'],
-            $pattern
-        );
-
-        return (bool) preg_match('/^'.$regexPattern.'$/i', $className);
-    }
 }

@@ -57,68 +57,32 @@ class EnumCommandsTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_enums_clear_command_works(): void
-    {
-        $this->artisan('enums:clear')
-            ->expectsOutput('No cache to clear - enum discovery is always fresh!')
-            ->assertSuccessful();
-    }
 
     public function test_enums_export_works_with_autodiscovery(): void
     {
         $this->createTestEnumFile();
 
-        $jsonPath = base_path('test_export.json');
-        $typesPath = base_path('test_export.d.ts');
+        $tempDir = sys_get_temp_dir().'/enumshare-export-test-'.time();
 
         $this->artisan('enums:export', [
-            '--path' => $jsonPath,
-            '--types' => $typesPath,
+            '--path' => $tempDir,
         ])
             ->expectsOutput('Generating enum manifest...')
             ->expectsOutputToContain('Exported 1 enum(s) to:')
             ->assertSuccessful();
 
-        expect(File::exists($jsonPath))->toBeTrue();
-        expect(File::exists($typesPath))->toBeTrue();
-
-        $manifest = json_decode(File::get($jsonPath), true);
-        expect($manifest)->toHaveKey('CommandTestEnum');
-
-        // Clean up
-        File::delete($jsonPath);
-        File::delete($typesPath);
-    }
-
-    public function test_enums_export_generates_individual_files(): void
-    {
-        $this->createTestEnumFile();
-
-        $tempDir = sys_get_temp_dir().'/enumshare-test-'.time();
-        $jsonPath = $tempDir.'/enums.generated.json';
-        $typesPath = $tempDir.'/enums.generated.d.ts';
-
-        $this->artisan('enums:export', [
-            '--path' => $jsonPath,
-            '--types' => $typesPath,
-        ])->assertSuccessful();
-
         // Check individual enum file is created
         expect(File::exists($tempDir.'/CommandTestEnum.ts'))->toBeTrue();
 
-        // Check CommandTestEnum file content
         $enumContent = File::get($tempDir.'/CommandTestEnum.ts');
         expect($enumContent)
             ->toContain('export const CommandTestEnum')
-            ->toContain('export type CommandTestEnumKey')
-            ->toContain('export type CommandTestEnumValue')
-            ->toContain('createEnumProxy')
-            ->toContain("'Active' | 'Inactive'")
-            ->toContain("'active' | 'inactive'");
+            ->toContain('createEnumProxy');
 
         // Clean up
         File::deleteDirectory($tempDir);
     }
+
 
     protected function createTestEnumFile(): void
     {

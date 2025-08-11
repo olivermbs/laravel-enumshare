@@ -3,7 +3,6 @@
 namespace Olivermbs\LaravelEnumshare;
 
 use Illuminate\Support\ServiceProvider;
-use Olivermbs\LaravelEnumshare\Commands\EnumsClearCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsDiscoverCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsExportAllLocalesCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsExportCommand;
@@ -21,8 +20,7 @@ class LaravelEnumshareServiceProvider extends ServiceProvider
 
         $this->app->singleton(EnumAutoDiscovery::class, function ($app) {
             return new EnumAutoDiscovery(
-                config('enumshare.autodiscovery.paths', []),
-                config('enumshare.autodiscovery.namespaces', [])
+                config('enumshare.autodiscovery.paths', [])
             );
         });
 
@@ -50,7 +48,6 @@ class LaravelEnumshareServiceProvider extends ServiceProvider
                 EnumsExportAllLocalesCommand::class,
                 EnumsWatchCommand::class,
                 EnumsDiscoverCommand::class,
-                EnumsClearCommand::class,
             ]);
         }
     }
