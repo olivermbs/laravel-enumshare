@@ -1,6 +1,9 @@
 // TypeScript runtime for Laravel Enumshare
 // This file provides a Proxy-based API to work with exported enums
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+declare const Proxy: any;
+
 export interface EnumEntry {
   key: string;
   value: string | number | null;
@@ -21,7 +24,8 @@ export interface EnumData {
   options: EnumOption[];
 }
 
-export interface EnumProxy extends Record<string, EnumEntry> {
+export interface EnumProxy {
+  [key: string]: EnumEntry | any;
   name: string;
   entries: EnumEntry[];
   options: EnumOption[];
@@ -40,37 +44,39 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
   }
 
   // Base object with metadata and methods
-  const baseObject = {
+  const baseObject: any = {
     name: enumData.name,
     entries: enumData.entries,
     options: enumData.options,
     keys: () => enumData.entries.map(entry => entry.key),
     values: () => enumData.entries.map(entry => entry.value ?? entry.key),
     labels: () => enumData.entries.map(entry => entry.label),
-  } as any;
+  };
 
   // Add the from method explicitly to avoid conflicts
-  const findEntryByValue = (value: string | number) => {
+  baseObject.from = (value: string | number) => {
     // Handle null/undefined gracefully
     if (value === null || value === undefined) {
       return null;
     }
     
     try {
-      const entry = enumData.entries.find(entry =>
-        (entry.value !== null ? entry.value : entry.key) === value
-      );
-      return entry || null;
+      // Use a more compatible approach for older TypeScript versions
+      for (let i = 0; i < enumData.entries.length; i++) {
+        const entry = enumData.entries[i];
+        if ((entry.value !== null ? entry.value : entry.key) === value) {
+          return entry;
+        }
+      }
+      return null;
     } catch (error) {
       // Silently handle any errors and return null
       return null;
     }
   };
 
-  baseObject.from = findEntryByValue;
-
   // Create proxy to handle dynamic property access
-  return new Proxy(baseObject, {
+  return new Proxy(baseObject as EnumProxy, {
     get(target: any, prop: string | symbol) {
       try {
         if (typeof prop === 'string' && entriesMap[prop]) {
@@ -104,49 +110,19 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
       }
       return Object.getOwnPropertyDescriptor(target, prop);
     },
-  }) as EnumProxy;
+  });
 }
 
 export function buildEnums(manifest: Record<string, EnumData>): Record<string, EnumProxy> {
   const enums: Record<string, EnumProxy> = {};
 
-  for (const [enumName, enumData] of Object.entries(manifest)) {
-    enums[enumName] = createEnumProxy(enumData);
+  for (const enumName in manifest) {
+    if (manifest.hasOwnProperty(enumName)) {
+      enums[enumName] = createEnumProxy(manifest[enumName]);
+    }
   }
 
   return enums;
-}
-
-let cachedEnums: Record<string, EnumProxy> | null = null;
-
-export function getEnum<T extends EnumProxy = EnumProxy>(
-  enumName: string,
-  manifest?: Record<string, EnumData>
-): T {
-  if (!cachedEnums) {
-    if (!manifest) {
-      throw new Error('Manifest must be provided on first call to getEnum');
-    }
-    cachedEnums = buildEnums(manifest);
-  }
-
-  const enumProxy = cachedEnums[enumName];
-  if (!enumProxy) {
-    throw new Error(`Enum '${enumName}' not found in manifest`);
-  }
-
-  return enumProxy as unknown as T;
-}
-
-export function getAllEnums(manifest?: Record<string, EnumData>): Record<string, EnumProxy> {
-  if (!cachedEnums) {
-    if (!manifest) {
-      throw new Error('Manifest must be provided on first call to getAllEnums');
-    }
-    cachedEnums = buildEnums(manifest);
-  }
-
-  return cachedEnums;
 }
 
 export default buildEnums;
