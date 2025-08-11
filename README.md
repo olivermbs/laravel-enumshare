@@ -16,11 +16,10 @@ You can install the package via composer:
 composer require 37539998-olivermbs/laravel-enumshare
 ```
 
-Publish the configuration file and TypeScript runtime:
+Publish the configuration file:
 
 ```bash
 php artisan vendor:publish --tag="enumshare-config"
-php artisan vendor:publish --tag="enumshare-stubs"
 ```
 
 ## Quickstart
