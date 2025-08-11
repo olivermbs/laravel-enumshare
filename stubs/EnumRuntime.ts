@@ -47,12 +47,14 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
     keys: () => enumData.entries.map(entry => entry.key),
     values: () => enumData.entries.map(entry => entry.value ?? entry.key),
     labels: () => enumData.entries.map(entry => entry.label),
-    from: (value: string | number) => {
-      const entry = enumData.entries.find(entry => 
-        (entry.value !== null ? entry.value : entry.key) === value
-      );
-      return entry || null;
-    },
+  } as any;
+  
+  // Add the from method explicitly to avoid conflicts
+  baseObject.from = (value: string | number) => {
+    const entry = enumData.entries.find(entry => 
+      (entry.value !== null ? entry.value : entry.key) === value
+    );
+    return entry || null;
   };
   
   // Create proxy to handle dynamic property access
