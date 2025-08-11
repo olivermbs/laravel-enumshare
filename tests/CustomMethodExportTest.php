@@ -43,19 +43,19 @@ enum TestContactType: int implements FrontendEnum
 
 it('exports custom method results as properties', function () {
     $result = TestContactType::forFrontend();
-    
+
     expect($result)->toHaveKey('entries');
     expect($result['entries'])->toHaveCount(4);
-    
+
     $postalEntry = collect($result['entries'])->firstWhere('key', 'POSTAL');
     $emailEntry = collect($result['entries'])->firstWhere('key', 'EMAIL');
     $phoneEntry = collect($result['entries'])->firstWhere('key', 'PHONE');
-    
+
     // Check isInstant property
     expect($postalEntry)->toHaveKey('isInstant');
     expect($postalEntry['isInstant'])->toBeFalse();
     expect($emailEntry['isInstant'])->toBeTrue();
-    
+
     // Check custom named property
     expect($phoneEntry)->toHaveKey('requiresPhoneNumber');
     expect($phoneEntry['requiresPhoneNumber'])->toBeTrue();

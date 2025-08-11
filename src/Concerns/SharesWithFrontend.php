@@ -130,16 +130,16 @@ trait SharesWithFrontend
 
         foreach ($enumMethods as $method) {
             $exportAttributes = $method->getAttributes(ExportMethod::class);
-            
-            if (!empty($exportAttributes)) {
+
+            if (! empty($exportAttributes)) {
                 $exportMethod = $exportAttributes[0]->newInstance();
                 $methodName = $exportMethod->name ?? $method->getName();
-                
+
                 // Skip methods with parameters for now (could be extended later)
                 if ($method->getNumberOfParameters() > 0) {
                     continue;
                 }
-                
+
                 // Call the method on the case and get the result
                 try {
                     $result = $case->{$method->getName()}();
