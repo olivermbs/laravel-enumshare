@@ -35,6 +35,7 @@ namespace App\Enums;
 
 use Olivermbs\LaravelEnumshare\Attributes\Label;
 use Olivermbs\LaravelEnumshare\Attributes\Meta;
+use Olivermbs\LaravelEnumshare\Attributes\TranslatedLabel;
 use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
 use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
 
@@ -42,7 +43,7 @@ enum TripStatus: string implements FrontendEnum
 {
     use SharesWithFrontend;
     
-    #[Label('Trip Saved')]
+    #[TranslatedLabel('trips.saved')]
     #[Meta(['color' => 'gray', 'icon' => 'save'])]
     case Saved = 'saved';
     
@@ -69,6 +70,7 @@ return [
     'export' => [
         'path' => resource_path('js/enums'),
         'locale' => null,
+        'locales' => [], // Multi-locale support for TranslatedLabel
     ],
     'lang_namespace' => 'enums',
 ];
@@ -195,15 +197,17 @@ wayfinder({
 ### Attributes
 
 - **`@Label`**: Custom display labels for enum cases
+- **`@TranslatedLabel`**: Translation-based labels with multi-locale support
 - **`@Meta`**: Arbitrary metadata (colors, icons, descriptions, etc.)
 
 ### Label Resolution
 
 Labels are resolved in this priority order:
 
-1. `@Label` attribute on the enum case
-2. Translation from `lang/en/enums.php` using `enums.{EnumName}.{CaseName}`
-3. The enum case name as fallback
+1. `@TranslatedLabel` attribute on the enum case
+2. `@Label` attribute on the enum case
+3. Translation from `lang/en/enums.php` using `enums.{EnumName}.{CaseName}`
+4. The enum case name as fallback
 
 ### TypeScript Integration
 
@@ -221,11 +225,83 @@ php artisan enums:export
 # Export for specific locale
 php artisan enums:export --locale=es
 
-# Export all locales at once
+# Export all locales at once  
 php artisan enums:export-all-locales
+
+# Watch for changes (alternative to Vite Wayfinder)
+php artisan enums:watch
 
 # Discover enums (always fresh - no caching)
 php artisan enums:discover
+```
+
+## Translation Support
+
+### TranslatedLabel Attribute
+
+Use `@TranslatedLabel` for translation-based labels instead of hardcoded strings:
+
+```php
+enum OrderStatus: string implements FrontendEnum
+{
+    use SharesWithFrontend;
+
+    #[TranslatedLabel('orders.pending')]
+    case Pending = 'pending';
+
+    #[TranslatedLabel('orders.confirmed', ['status' => 'active'])] 
+    case Confirmed = 'confirmed';
+
+    #[Label('Cancelled')] // Mix with regular labels
+    case Cancelled = 'cancelled';
+}
+```
+
+### Multi-Locale Support
+
+Configure multiple locales to export all translations:
+
+```php
+// config/enumshare.php
+'export' => [
+    'locales' => ['en', 'fr', 'es'],
+],
+```
+
+Create translation files:
+
+```php
+// lang/en/orders.php
+return [
+    'pending' => 'Pending Order',
+    'confirmed' => 'Confirmed :status Order',
+];
+
+// lang/fr/orders.php  
+return [
+    'pending' => 'Commande en attente',
+    'confirmed' => 'Commande :status confirmée',
+];
+```
+
+### Output Format
+
+**Single locale** (when no `locales` configured):
+```typescript
+{
+    label: "Pending Order"
+}
+```
+
+**Multiple locales**:
+```typescript  
+{
+    label: {
+        en: "Pending Order",
+        fr: "Commande en attente",
+        es: "Pedido pendiente"
+    }
+}
 ```
 
 ## Auto-Discovery

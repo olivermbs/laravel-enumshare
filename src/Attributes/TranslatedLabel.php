@@ -5,9 +5,10 @@ namespace Olivermbs\LaravelEnumshare\Attributes;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS_CONSTANT)]
-class Label
+class TranslatedLabel
 {
     public function __construct(
-        public readonly string $text
+        public readonly string $key,
+        public readonly array $parameters = []
     ) {}
 }

@@ -36,6 +36,17 @@ return [
         | Set to null to use app()->getLocale()
         */
         'locale' => null,
+
+        /*
+        | Locales to include when generating translations
+        | Used by TranslatedLabel attributes to export all available translations
+        | If empty, will default to just the current/default locale
+        */
+        'locales' => [
+            // 'en',
+            // 'fr',
+            // 'es',
+        ],
     ],
 
     /*

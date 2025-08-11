@@ -5,6 +5,7 @@ namespace Olivermbs\LaravelEnumshare\Concerns;
 use BackedEnum;
 use Olivermbs\LaravelEnumshare\Attributes\Label;
 use Olivermbs\LaravelEnumshare\Attributes\Meta;
+use Olivermbs\LaravelEnumshare\Attributes\TranslatedLabel;
 use ReflectionClass;
 use ReflectionClassConstant;
 
@@ -23,13 +24,15 @@ trait SharesWithFrontend
             $backingType = is_string($firstCase->value) ? 'string' : 'int';
         }
 
+        $configuredLocales = config('enumshare.export.locales', []);
+        
         $entries = [];
         $options = [];
 
         foreach (static::cases() as $case) {
             $caseReflection = $reflection->getReflectionConstant($case->name);
 
-            $label = static::resolveLabel($case, $caseReflection, $enumName, $locale);
+            $label = static::resolveLabel($case, $caseReflection, $enumName, $locale, $configuredLocales);
             $meta = static::resolveMeta($caseReflection);
 
             $entry = [
@@ -40,9 +43,15 @@ trait SharesWithFrontend
             ];
 
             $entries[] = $entry;
+            
+            // For options, use the label as string (current locale or first available)
+            $optionLabel = is_array($label) 
+                ? ($label[$locale ?? app()->getLocale()] ?? reset($label))
+                : $label;
+                
             $options[] = [
                 'value' => $isBacked ? $case->value : $case->name,
-                'label' => $label,
+                'label' => $optionLabel,
             ];
         }
 
@@ -55,8 +64,28 @@ trait SharesWithFrontend
         ];
     }
 
-    protected static function resolveLabel($case, ReflectionClassConstant $reflection, string $enumName, ?string $locale): string
+    protected static function resolveLabel($case, ReflectionClassConstant $reflection, string $enumName, ?string $locale, array $configuredLocales = []): string|array
     {
+        $translatedLabelAttributes = $reflection->getAttributes(TranslatedLabel::class);
+        
+        if (! empty($translatedLabelAttributes)) {
+            $translatedLabel = $translatedLabelAttributes[0]->newInstance();
+            
+            // If no locales configured, use current locale only
+            if (empty($configuredLocales)) {
+                $currentLocale = $locale ?: app()->getLocale();
+                return trans($translatedLabel->key, $translatedLabel->parameters, $currentLocale);
+            }
+            
+            // Generate translations for all configured locales
+            $translations = [];
+            foreach ($configuredLocales as $localeCode) {
+                $translations[$localeCode] = trans($translatedLabel->key, $translatedLabel->parameters, $localeCode);
+            }
+            
+            return $translations;
+        }
+
         $labelAttributes = $reflection->getAttributes(Label::class);
 
         if (! empty($labelAttributes)) {
