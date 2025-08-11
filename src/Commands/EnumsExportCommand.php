@@ -48,10 +48,24 @@ class EnumsExportCommand extends Command
 
     protected function writeIndividualEnumFiles(array $manifest, string $enumsDir): void
     {
+        // Copy EnumRuntime.ts from package resources
+        $this->copyEnumRuntime($enumsDir);
+        
         foreach ($manifest as $enumName => $enumData) {
             $content = $this->generateIndividualEnumFile($enumName, $enumData);
             $filePath = "{$enumsDir}/{$enumName}.ts";
             File::put($filePath, $content);
+        }
+    }
+    
+    protected function copyEnumRuntime(string $enumsDir): void
+    {
+        $sourcePath = __DIR__ . '/../Resources/EnumRuntime.ts';
+        $targetPath = "{$enumsDir}/EnumRuntime.ts";
+        
+        if (File::exists($sourcePath)) {
+            File::copy($sourcePath, $targetPath);
+            $this->info('📋 Copied EnumRuntime.ts');
         }
     }
 
@@ -102,7 +116,6 @@ class EnumsExportCommand extends Command
         $content .= "  values(): {$enumName}Value[];\n";
         $content .= "  labels(): string[];\n";
         $content .= "  from(value: {$enumName}Value): {$enumName}Entry | null;\n";
-        $content .= "  fromValue(value: {$enumName}Value): {$enumName}Entry | null;\n";
         $content .= "}\n\n";
 
         // Export the enum instance

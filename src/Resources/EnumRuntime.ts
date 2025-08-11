@@ -29,17 +29,16 @@ export interface EnumProxy extends Record<string, EnumEntry> {
   values(): (string | number)[];
   labels(): string[];
   from(value: string | number): EnumEntry | null;
-  fromValue(value: string | number): EnumEntry | null;
 }
 
 export function createEnumProxy(enumData: EnumData): EnumProxy {
   const entriesMap: Record<string, EnumEntry> = {};
-  
+
   // Build entries map
   for (const entry of enumData.entries) {
     entriesMap[entry.key] = entry;
   }
-  
+
   // Base object with metadata and methods
   const baseObject = {
     name: enumData.name,
@@ -49,51 +48,38 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
     values: () => enumData.entries.map(entry => entry.value ?? entry.key),
     labels: () => enumData.entries.map(entry => entry.label),
   } as any;
-  
+
   // Add the from method explicitly to avoid conflicts
   const findEntryByValue = (value: string | number) => {
-    const entry = enumData.entries.find(entry => 
+    const entry = enumData.entries.find(entry =>
       (entry.value !== null ? entry.value : entry.key) === value
     );
     return entry || null;
   };
-  
+
   baseObject.from = findEntryByValue;
-  baseObject.fromValue = findEntryByValue;
-  
-  // Debug: Check if methods exist
-  console.log('createEnumProxy baseObject.from:', typeof baseObject.from);
-  console.log('createEnumProxy baseObject.fromValue:', typeof baseObject.fromValue);
-  console.log('createEnumProxy baseObject keys:', Object.keys(baseObject));
-  console.log('createEnumProxy baseObject methods test:');
-  console.log('  - from(1):', baseObject.from ? baseObject.from(1) : 'NOT FOUND');
-  console.log('  - fromValue(1):', baseObject.fromValue ? baseObject.fromValue(1) : 'NOT FOUND');
-  
+
   // Create proxy to handle dynamic property access
-  return new Proxy(baseObject, {
+  // @ts-ignore
+    return new Proxy(baseObject, {
     get(target: any, prop: string | symbol) {
-      // Debug: Log what's being accessed
-      if (prop === 'from') {
-        console.log('Proxy get "from":', typeof target[prop], target[prop]);
-      }
-      
       if (typeof prop === 'string' && entriesMap[prop]) {
         return entriesMap[prop];
       }
       return target[prop];
     },
-    
+
     has(target: any, prop: string | symbol) {
       if (typeof prop === 'string' && entriesMap[prop]) {
         return true;
       }
       return prop in target;
     },
-    
+
     ownKeys(target: any) {
       return [...Object.keys(target), ...Object.keys(entriesMap)];
     },
-    
+
     getOwnPropertyDescriptor(target: any, prop: string | symbol) {
       if (typeof prop === 'string' && entriesMap[prop]) {
         return {
@@ -109,18 +95,18 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
 
 export function buildEnums(manifest: Record<string, EnumData>): Record<string, EnumProxy> {
   const enums: Record<string, EnumProxy> = {};
-  
+
   for (const [enumName, enumData] of Object.entries(manifest)) {
     enums[enumName] = createEnumProxy(enumData);
   }
-  
+
   return enums;
 }
 
 let cachedEnums: Record<string, EnumProxy> | null = null;
 
 export function getEnum<T extends EnumProxy = EnumProxy>(
-  enumName: string, 
+  enumName: string,
   manifest?: Record<string, EnumData>
 ): T {
   if (!cachedEnums) {
@@ -129,12 +115,12 @@ export function getEnum<T extends EnumProxy = EnumProxy>(
     }
     cachedEnums = buildEnums(manifest);
   }
-  
+
   const enumProxy = cachedEnums[enumName];
   if (!enumProxy) {
     throw new Error(`Enum '${enumName}' not found in manifest`);
   }
-  
+
   return enumProxy as unknown as T;
 }
 
@@ -145,7 +131,7 @@ export function getAllEnums(manifest?: Record<string, EnumData>): Record<string,
     }
     cachedEnums = buildEnums(manifest);
   }
-  
+
   return cachedEnums;
 }
 
