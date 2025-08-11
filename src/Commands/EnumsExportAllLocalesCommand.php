@@ -21,6 +21,7 @@ class EnumsExportAllLocalesCommand extends Command
 
         if (empty($locales)) {
             $this->warn('No locales configured. Add locales to config or use --locales option.');
+
             return self::SUCCESS;
         }
 
@@ -28,7 +29,7 @@ class EnumsExportAllLocalesCommand extends Command
 
         foreach ($locales as $locale) {
             $this->info("Generating for locale: {$locale}");
-            
+
             $localeDir = "{$basePath}/{$locale}";
             $jsonPath = "{$localeDir}/enums.generated.json";
             $typesPath = "{$localeDir}/enums.generated.d.ts";
@@ -37,6 +38,7 @@ class EnumsExportAllLocalesCommand extends Command
 
             if (empty($manifest)) {
                 $this->warn("No enums found for locale: {$locale}");
+
                 continue;
             }
 
@@ -52,6 +54,7 @@ class EnumsExportAllLocalesCommand extends Command
         }
 
         $this->info('✅ Multi-locale export completed!');
+
         return self::SUCCESS;
     }
 

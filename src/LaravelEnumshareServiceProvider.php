@@ -5,8 +5,8 @@ namespace Olivermbs\LaravelEnumshare;
 use Illuminate\Support\ServiceProvider;
 use Olivermbs\LaravelEnumshare\Commands\EnumsClearCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsDiscoverCommand;
-use Olivermbs\LaravelEnumshare\Commands\EnumsExportCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsExportAllLocalesCommand;
+use Olivermbs\LaravelEnumshare\Commands\EnumsExportCommand;
 use Olivermbs\LaravelEnumshare\Support\EnumAutoDiscovery;
 use Olivermbs\LaravelEnumshare\Support\EnumRegistry;
 
