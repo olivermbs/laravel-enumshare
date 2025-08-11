@@ -29,7 +29,7 @@ export interface EnumProxy extends Record<string, EnumEntry> {
   values(): (string | number)[];
   labels(): string[];
   from(value: string | number): EnumEntry | null;
-  findByValue(value: string | number): EnumEntry | null;
+  fromValue(value: string | number): EnumEntry | null;
 }
 
 export function createEnumProxy(enumData: EnumData): EnumProxy {
@@ -59,11 +59,15 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
   };
   
   baseObject.from = findEntryByValue;
-  baseObject.findByValue = findEntryByValue;
+  baseObject.fromValue = findEntryByValue;
   
-  // Debug: Check if from method exists
+  // Debug: Check if methods exist
   console.log('createEnumProxy baseObject.from:', typeof baseObject.from);
+  console.log('createEnumProxy baseObject.fromValue:', typeof baseObject.fromValue);
   console.log('createEnumProxy baseObject keys:', Object.keys(baseObject));
+  console.log('createEnumProxy baseObject methods test:');
+  console.log('  - from(1):', baseObject.from ? baseObject.from(1) : 'NOT FOUND');
+  console.log('  - fromValue(1):', baseObject.fromValue ? baseObject.fromValue(1) : 'NOT FOUND');
   
   // Create proxy to handle dynamic property access
   return new Proxy(baseObject, {
