@@ -12,6 +12,6 @@ class Label
     ) {
         $this->text = (string) $text;
     }
-    
+
     public readonly string $text;
 }
