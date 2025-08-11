@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Olivermbs\LaravelEnumshare\Commands\EnumsClearCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsDiscoverCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsExportCommand;
+use Olivermbs\LaravelEnumshare\Commands\EnumsExportAllLocalesCommand;
 use Olivermbs\LaravelEnumshare\Support\EnumAutoDiscovery;
 use Olivermbs\LaravelEnumshare\Support\EnumRegistry;
 
@@ -44,8 +45,13 @@ class LaravelEnumshareServiceProvider extends ServiceProvider
                 __DIR__.'/../stubs/EnumRuntime.ts' => resource_path('js/enums/EnumRuntime.ts'),
             ], 'enumshare-stubs');
 
+            $this->publishes([
+                __DIR__.'/../stubs/vite-plugin-laravel-enums.js' => base_path('vite-plugin-laravel-enums.js'),
+            ], 'enumshare-vite');
+
             $this->commands([
                 EnumsExportCommand::class,
+                EnumsExportAllLocalesCommand::class,
                 EnumsDiscoverCommand::class,
                 EnumsClearCommand::class,
             ]);

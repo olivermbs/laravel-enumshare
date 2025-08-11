@@ -23,11 +23,12 @@ You can install the package via composer:
 composer require 37539998-olivermbs/laravel-enumshare
 ```
 
-Publish the configuration file and TypeScript runtime:
+Publish the configuration file, TypeScript runtime, and Vite plugin:
 
 ```bash
 php artisan vendor:publish --tag="enumshare-config"
 php artisan vendor:publish --tag="enumshare-stubs"
+php artisan vendor:publish --tag="enumshare-vite"
 ```
 
 ## Quickstart
@@ -83,7 +84,28 @@ return [
 ];
 ```
 
-### 3. Export Enums
+### 3. Setup Vite Integration (Optional but Recommended)
+
+Add the Vite plugin to automatically regenerate enums during development:
+
+```javascript
+// vite.config.js
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import { laravelEnums } from './vite-plugin-laravel-enums.js';
+
+export default defineConfig({
+  plugins: [
+    laravel({
+      input: ['resources/css/app.css', 'resources/js/app.js'],
+      refresh: true,
+    }),
+    laravelEnums(),
+  ],
+});
+```
+
+### 4. Export Enums
 
 Run the export command to generate JSON manifest and TypeScript definitions:
 
@@ -96,7 +118,9 @@ This creates:
 - `resources/js/enums/enums.generated.d.ts` - TypeScript definitions
 - `resources/js/enums/{EnumName}.ts` - Individual importable enum files
 
-### 4. Use in Frontend
+With the Vite plugin, this happens automatically when you change enum files!
+
+### 5. Use in Frontend
 
 #### Option A: Direct Import (Recommended)
 
@@ -168,6 +192,20 @@ const allEnums = getAllEnums(manifest);
 import { TripStatus } from '@/enums/TripStatus';
 ```
 
+### Vite Integration
+
+🔥 **Automatic regeneration** during development! The Vite plugin:
+
+- **Watches enum files** - Auto-regenerates when you change PHP enums
+- **Watches translations** - Updates when you change `lang/*/enums.php` files  
+- **Hot Module Replacement** - Frontend updates instantly without browser refresh
+- **Build integration** - Ensures enums are generated before production builds
+
+```javascript
+// vite.config.js - Just add the plugin!
+laravelEnums() // That's it!
+```
+
 ### Attributes
 
 - **`@Label`**: Custom display labels for enum cases
@@ -188,14 +226,20 @@ Labels are resolved in this priority order:
 - Proxy-based API for natural enum access
 - Support for both backed and pure enums
 
-### CLI Options
+### CLI Commands
 
 ```bash
-# Override paths
-php artisan enums:export --path=resources/js/custom/enums.json --types=resources/js/custom/types.d.ts
+# Export enums (run manually or via Vite plugin)
+php artisan enums:export
 
 # Export for specific locale
 php artisan enums:export --locale=es
+
+# Export all locales at once
+php artisan enums:export-all-locales
+
+# Discover enums (with autodiscovery enabled)
+php artisan enums:discover
 ```
 
 ## Auto-Discovery
