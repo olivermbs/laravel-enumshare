@@ -1,6 +1,6 @@
 <?php
 
-namespace Oliver Smith\LaravelEnumshare\Commands;
+namespace Olivermbs\LaravelEnumshare\Commands;
 
 use Illuminate\Console\Command;
 

@@ -1,5 +1,5 @@
 <?php
 
-namespace Oliver Smith\LaravelEnumshare;
+namespace Olivermbs\LaravelEnumshare;
 
 class LaravelEnumshare {}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Oliver Smith\LaravelEnumshare\Database\Factories;
+namespace Olivermbs\LaravelEnumshare\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 

@@ -1,16 +1,16 @@
 <?php
 
-namespace Oliver Smith\LaravelEnumshare\Facades;
+namespace Olivermbs\LaravelEnumshare\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Oliver Smith\LaravelEnumshare\LaravelEnumshare
+ * @see \Olivermbs\LaravelEnumshare\LaravelEnumshare
  */
 class LaravelEnumshare extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \Oliver Smith\LaravelEnumshare\LaravelEnumshare::class;
+        return \Olivermbs\LaravelEnumshare\LaravelEnumshare::class;
     }
 }
