@@ -41,30 +41,34 @@ class EnumsWatchCommand extends Command
     protected function hasChanges(): bool
     {
         $files = $this->getWatchedFiles();
-        
+
         foreach ($files as $file) {
-            if (!file_exists($file)) continue;
-            
-            $hash = md5_file($file);
-            
-            if (!isset($this->fileHashes[$file])) {
-                $this->fileHashes[$file] = $hash;
+            if (! file_exists($file)) {
                 continue;
             }
-            
+
+            $hash = md5_file($file);
+
+            if (! isset($this->fileHashes[$file])) {
+                $this->fileHashes[$file] = $hash;
+
+                continue;
+            }
+
             if ($this->fileHashes[$file] !== $hash) {
                 $this->fileHashes[$file] = $hash;
+
                 return true;
             }
         }
-        
+
         return false;
     }
 
     protected function getWatchedFiles(): array
     {
         $files = [];
-        
+
         // Watch enum files from autodiscovery paths
         if (config('enumshare.autodiscovery.enabled')) {
             foreach (config('enumshare.autodiscovery.paths', []) as $path) {
@@ -74,7 +78,7 @@ class EnumsWatchCommand extends Command
                 }
             }
         }
-        
+
         // Watch configured enum files
         foreach (config('enumshare.enums', []) as $enumClass) {
             if (class_exists($enumClass)) {
@@ -82,34 +86,36 @@ class EnumsWatchCommand extends Command
                 $files[] = $reflection->getFileName();
             }
         }
-        
+
         // Watch translation files
         $langDir = base_path('lang');
         if (File::isDirectory($langDir)) {
             $files = array_merge($files, $this->getEnumTranslationFiles($langDir));
         }
-        
+
         // Watch config
         $files[] = config_path('enumshare.php');
-        
+
         return array_filter($files, 'file_exists');
     }
 
     protected function getPhpFiles(string $dir): array
     {
-        if (!File::isDirectory($dir)) return [];
-        
+        if (! File::isDirectory($dir)) {
+            return [];
+        }
+
         $files = [];
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($dir)
         );
-        
+
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
                 $files[] = $file->getRealPath();
             }
         }
-        
+
         return $files;
     }
 
@@ -117,14 +123,14 @@ class EnumsWatchCommand extends Command
     {
         $files = [];
         $dirs = File::directories($langDir);
-        
+
         foreach ($dirs as $localeDir) {
-            $enumFile = $localeDir . '/enums.php';
+            $enumFile = $localeDir.'/enums.php';
             if (file_exists($enumFile)) {
                 $files[] = $enumFile;
             }
         }
-        
+
         return $files;
     }
 
