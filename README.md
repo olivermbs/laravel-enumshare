@@ -97,7 +97,7 @@ npm install --save-dev @laravel/vite-plugin-wayfinder
 // vite.config.js
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import wayfinder from '@laravel/vite-plugin-wayfinder';
+import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 
 export default defineConfig({
   plugins: [
@@ -106,9 +106,12 @@ export default defineConfig({
       refresh: true,
     }),
     wayfinder({
-      'app/Enums/**/*.php': 'php artisan enums:export',
-      'lang/*/enums.php': 'php artisan enums:export',
-      'config/enumshare.php': 'php artisan enums:export',
+      command: 'php artisan enums:export',
+      patterns: [
+        'app/Enums/**/*.php',
+        'lang/*/enums.php', 
+        'config/enumshare.php'
+      ],
     }),
   ],
 });
@@ -225,8 +228,11 @@ import { TripStatus } from '@/enums/TripStatus';
 ```javascript
 // vite.config.js - Configure file patterns to watch
 wayfinder({
-  'app/Enums/**/*.php': 'php artisan enums:export',
-  'lang/*/enums.php': 'php artisan enums:export',
+  command: 'php artisan enums:export',
+  patterns: [
+    'app/Enums/**/*.php',
+    'lang/*/enums.php'
+  ],
 })
 ```
 
