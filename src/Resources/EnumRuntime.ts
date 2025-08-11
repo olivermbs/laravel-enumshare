@@ -1,124 +1,133 @@
 // TypeScript runtime for Laravel Enumshare
-// This file provides a Proxy-based API to work with exported enums
+// Proxy-free implementation with full type safety
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-declare const Proxy: any;
+type Backing = string | number;
 
-export interface EnumEntry {
-  key: string;
-  value: string | number | null;
+export type EnumEntry<K extends string, V extends Backing | null, M extends Record<string, unknown>> = Readonly<{
+  key: K;
+  value: V;
   label: string;
-  meta: Record<string, any>;
-}
+  meta: M;
+}>;
 
-export interface EnumOption {
-  value: string | number;
+export type EnumOption<V extends Backing> = Readonly<{
+  value: V;
   label: string;
-}
+}>;
 
-export interface EnumData {
+export type EnumData<K extends string, V extends Backing, M extends Record<string, unknown>> = Readonly<{
   name: string;
   fqcn: string;
-  backingType: any;
-  entries: EnumEntry[];
-  options: EnumOption[];
-}
+  backingType: 'int' | 'string' | string;
+  entries: ReadonlyArray<EnumEntry<K, V | null, M>>;
+  options: ReadonlyArray<EnumOption<V>>;
+}>;
 
-export interface EnumProxy {
-  [key: string]: EnumEntry | any;
-  name: string;
-  entries: EnumEntry[];
-  options: EnumOption[];
-  keys(): string[];
-  values(): (string | number)[];
-  labels(): string[];
-  from(value: string | number): EnumEntry | null;
-}
+export type EnumObject<
+  K extends string,
+  V extends Backing,
+  M extends Record<string, unknown>
+> = Readonly<
+  {
+    name: string;
+    entries: ReadonlyArray<EnumEntry<K, V | null, M>>;
+    options: ReadonlyArray<EnumOption<V>>;
+    keys(): ReadonlyArray<K>;
+    values(): ReadonlyArray<V | K>;
+    labels(): ReadonlyArray<string>;
+    from(value: V | K | null | undefined): EnumEntry<K, V | null, M> | null;
+    tryFrom(value: unknown): EnumEntry<K, V | null, M> | null;
+    hasKey(key: unknown): key is K;
+    hasValue(val: unknown): val is V | K;
+  } & { [P in K]: EnumEntry<K, V | null, M> }
+>;
 
-export function createEnumProxy(enumData: EnumData): EnumProxy {
-  const entriesMap: Record<string, EnumEntry> = {};
+/** Build a plain, frozen enum object. No Proxy. */
+export function buildEnum<
+  const K extends string,
+  const V extends Backing,
+  const M extends Record<string, unknown> = Record<string, unknown>
+>(data: EnumData<K, V, M>): EnumObject<K, V, M> {
+  const obj = Object.create(null) as Record<string, unknown>;
 
-  // Build entries map
-  for (const entry of enumData.entries) {
-    entriesMap[entry.key] = entry;
+  const entries = Object.freeze(data.entries.map(e => Object.freeze({ ...e }))) as ReadonlyArray<EnumEntry<K, V | null, M>>;
+  const options = Object.freeze(data.options.map(o => Object.freeze({ ...o }))) as ReadonlyArray<EnumOption<V>>;
+
+  const byKey = new Map<K, EnumEntry<K, V | null, M>>();
+  const byValue = new Map<V | K, EnumEntry<K, V | null, M>>();
+
+  for (const e of entries) {
+    byKey.set(e.key, e);
+    byValue.set((e.value ?? e.key) as V | K, e);
+    Object.defineProperty(obj, e.key, {
+      value: e,
+      enumerable: true,
+      configurable: false,
+      writable: false,
+    });
   }
 
-  // Base object with metadata and methods
-  const baseObject: any = {
-    name: enumData.name,
-    entries: enumData.entries,
-    options: enumData.options,
-    keys: () => enumData.entries.map(entry => entry.key),
-    values: () => enumData.entries.map(entry => entry.value ?? entry.key),
-    labels: () => enumData.entries.map(entry => entry.label),
-  };
+  let _keys: ReadonlyArray<K> | undefined;
+  let _values: ReadonlyArray<V | K> | undefined;
+  let _labels: ReadonlyArray<string> | undefined;
 
-  // Add the from method explicitly to avoid conflicts
-  baseObject.from = (value: string | number) => {
-    // Handle null/undefined gracefully
-    if (value === null || value === undefined) {
-      return null;
-    }
-    
-    try {
-      // Use a more compatible approach for older TypeScript versions
-      for (let i = 0; i < enumData.entries.length; i++) {
-        const entry = enumData.entries[i];
-        if ((entry.value !== null ? entry.value : entry.key) === value) {
-          return entry;
-        }
+  const api = {
+    name: data.name,
+    entries,
+    options,
+    keys(): ReadonlyArray<K> {
+      return (_keys ??= entries.map(e => e.key) as ReadonlyArray<K>);
+    },
+    values(): ReadonlyArray<V | K> {
+      return (_values ??= entries.map(e => (e.value ?? e.key) as V | K));
+    },
+    labels(): ReadonlyArray<string> {
+      return (_labels ??= entries.map(e => e.label));
+    },
+    from(value: V | K | null | undefined) {
+      if (value == null) return null;
+      return byValue.get(value as V | K) ?? null;
+    },
+    tryFrom(value: unknown) {
+      if (byValue.has(value as V | K)) return byValue.get(value as V | K)!;
+      if (typeof value === 'string') {
+        if (byKey.has(value as K)) return byKey.get(value as K)!;
+        const n = Number(value);
+        if (!Number.isNaN(n) && byValue.has(n as V)) return byValue.get(n as V)!;
       }
       return null;
-    } catch (error) {
-      // Silently handle any errors and return null
-      return null;
-    }
-  };
-
-  // Create proxy to handle dynamic property access
-  return new Proxy(baseObject as EnumProxy, {
-    get(target: any, prop: string | symbol) {
-      try {
-        if (typeof prop === 'string' && entriesMap[prop]) {
-          return entriesMap[prop];
-        }
-        return target[prop];
-      } catch (error) {
-        // Silently handle any proxy errors
-        return undefined;
-      }
     },
-
-    has(target: any, prop: string | symbol) {
-      if (typeof prop === 'string' && entriesMap[prop]) {
-        return true;
-      }
-      return prop in target;
+    hasKey(k: unknown): k is K {
+      return typeof k === 'string' && byKey.has(k as K);
     },
-
-    ownKeys(target: any) {
-      return [...Object.keys(target), ...Object.keys(entriesMap)];
+    hasValue(v: unknown): v is V | K {
+      return byValue.has(v as V | K);
     },
+  } as const;
 
-    getOwnPropertyDescriptor(target: any, prop: string | symbol) {
-      if (typeof prop === 'string' && entriesMap[prop]) {
-        return {
-          enumerable: true,
-          configurable: true,
-          value: entriesMap[prop],
-        };
-      }
-      return Object.getOwnPropertyDescriptor(target, prop);
-    },
-  });
+  const full = Object.assign(obj, api);
+  return Object.freeze(full) as EnumObject<K, V, M>;
 }
 
-export function buildEnums(manifest: Record<string, EnumData>): Record<string, EnumProxy> {
-  const enums: Record<string, EnumProxy> = {};
+// Legacy compatibility functions
+export function createEnumProxy<
+  const K extends string,
+  const V extends Backing,
+  const M extends Record<string, unknown> = Record<string, unknown>
+>(enumData: EnumData<K, V, M>): EnumObject<K, V, M> {
+  return buildEnum(enumData);
+}
+
+export function buildEnums<
+  const K extends string,
+  const V extends Backing,
+  const M extends Record<string, unknown> = Record<string, unknown>
+>(manifest: Record<string, EnumData<K, V, M>>): Record<string, EnumObject<K, V, M>> {
+  const enums: Record<string, EnumObject<K, V, M>> = {};
 
   for (const enumName in manifest) {
     if (manifest.hasOwnProperty(enumName)) {
-      enums[enumName] = createEnumProxy(manifest[enumName]);
+      enums[enumName] = buildEnum(manifest[enumName]);
     }
   }
 

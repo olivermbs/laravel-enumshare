@@ -73,19 +73,19 @@ class EnumsExportAllLocalesCommand extends Command
     {
         // Copy EnumRuntime.ts from package resources
         $this->copyEnumRuntime($enumsDir);
-        
+
         foreach ($manifest as $enumName => $enumData) {
             $content = $this->generateIndividualEnumFile($enumName, $enumData, $locale);
             $filePath = "{$enumsDir}/{$enumName}.ts";
             File::put($filePath, $content);
         }
     }
-    
+
     protected function copyEnumRuntime(string $enumsDir): void
     {
-        $sourcePath = __DIR__ . '/../Resources/EnumRuntime.ts';
+        $sourcePath = __DIR__.'/../Resources/EnumRuntime.ts';
         $targetPath = "{$enumsDir}/EnumRuntime.ts";
-        
+
         if (File::exists($sourcePath)) {
             File::copy($sourcePath, $targetPath);
             $this->info('📋 Copied EnumRuntime.ts');

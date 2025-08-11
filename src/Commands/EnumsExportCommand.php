@@ -50,19 +50,19 @@ class EnumsExportCommand extends Command
     {
         // Copy EnumRuntime.ts from package resources
         $this->copyEnumRuntime($enumsDir);
-        
+
         foreach ($manifest as $enumName => $enumData) {
             $content = $this->generateIndividualEnumFile($enumName, $enumData);
             $filePath = "{$enumsDir}/{$enumName}.ts";
             File::put($filePath, $content);
         }
     }
-    
+
     protected function copyEnumRuntime(string $enumsDir): void
     {
-        $sourcePath = __DIR__ . '/../Resources/EnumRuntime.ts';
+        $sourcePath = __DIR__.'/../Resources/EnumRuntime.ts';
         $targetPath = "{$enumsDir}/EnumRuntime.ts";
-        
+
         if (File::exists($sourcePath)) {
             File::copy($sourcePath, $targetPath);
             $this->info('📋 Copied EnumRuntime.ts');
@@ -72,54 +72,15 @@ class EnumsExportCommand extends Command
     protected function generateIndividualEnumFile(string $enumName, array $enumData): string
     {
         $content = "// This file is auto-generated. Do not edit manually.\n";
-        $content .= "import { createEnumProxy, type EnumProxy } from './EnumRuntime';\n\n";
+        $content .= "import { buildEnum } from './EnumRuntime';\n\n";
 
-        // Generate the enum data as a constant
+        // Generate the enum data as a const assertion for full type inference
         $enumDataJson = json_encode($enumData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        $content .= "const {$enumName}Data = {$enumDataJson};\n\n";
+        $content .= "const {$enumName}Data = {$enumDataJson} as const;\n\n";
 
-        // Generate TypeScript types
-        $keys = array_map(fn ($entry) => "'{$entry['key']}'", $enumData['entries']);
-        $keyUnion = implode(' | ', $keys);
-
-        if ($enumData['backingType'] === 'string') {
-            $values = array_map(fn ($entry) => "'{$entry['value']}'", $enumData['entries']);
-        } elseif ($enumData['backingType'] === 'int') {
-            $values = array_map(fn ($entry) => $entry['value'], $enumData['entries']);
-        } else {
-            $values = $keys;
-        }
-        $valueUnion = implode(' | ', $values);
-
-        $content .= "export type {$enumName}Key = {$keyUnion};\n";
-        $content .= "export type {$enumName}Value = {$valueUnion};\n\n";
-
-        $content .= "export interface {$enumName}Entry {\n";
-        $content .= "  key: {$enumName}Key;\n";
-        $content .= '  value: '.($enumData['backingType'] ? "{$enumName}Value" : 'null').";\n";
-        $content .= "  label: string;\n";
-        $content .= "  meta: Record<string, any>;\n";
-        $content .= "}\n\n";
-
-        $content .= "export interface {$enumName}Option {\n";
-        $content .= "  value: {$enumName}Value;\n";
-        $content .= "  label: string;\n";
-        $content .= "}\n\n";
-
-        // Generate the enum proxy interface
-        $entryRecord = "Record<{$enumName}Key, {$enumName}Entry>";
-        $content .= "export interface {$enumName}Enum extends {$entryRecord} {\n";
-        $content .= "  name: string;\n";
-        $content .= "  entries: {$enumName}Entry[];\n";
-        $content .= "  options: {$enumName}Option[];\n";
-        $content .= "  keys(): {$enumName}Key[];\n";
-        $content .= "  values(): {$enumName}Value[];\n";
-        $content .= "  labels(): string[];\n";
-        $content .= "  from(value: {$enumName}Value): {$enumName}Entry | null;\n";
-        $content .= "}\n\n";
-
-        // Export the enum instance
-        $content .= "export const {$enumName}: {$enumName}Enum = createEnumProxy({$enumName}Data) as {$enumName}Enum;\n";
+        // Export the enum instance with proper typing
+        $content .= "export const {$enumName} = buildEnum({$enumName}Data);\n";
+        $content .= "export type {$enumName} = typeof {$enumName};\n";
         $content .= "export default {$enumName};\n";
 
         return $content;
