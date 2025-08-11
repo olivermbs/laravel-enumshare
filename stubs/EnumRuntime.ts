@@ -21,8 +21,7 @@ export interface EnumData {
   options: EnumOption[];
 }
 
-export interface EnumProxy {
-  [key: string]: EnumEntry;
+export interface EnumProxy extends Record<string, EnumEntry> {
   name: string;
   entries: EnumEntry[];
   options: EnumOption[];
@@ -117,7 +116,7 @@ export function getEnum<T extends EnumProxy = EnumProxy>(
     throw new Error(`Enum '${enumName}' not found in manifest`);
   }
   
-  return enumProxy as T;
+  return enumProxy as unknown as T;
 }
 
 export function getAllEnums(manifest?: Record<string, EnumData>): Record<string, EnumProxy> {
