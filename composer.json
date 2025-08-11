@@ -1,24 +1,24 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "37539998-olivermbs/laravel-enumshare",
+    "description": "This is my package laravel-enumshare",
     "keywords": [
-        ":vendor_name",
+        "Oliver Smith",
         "laravel",
-        ":package_slug"
+        "laravel-enumshare"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/37539998-olivermbs/laravel-enumshare",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Oliver Smith",
+            "email": "37539998+olivermbs@users.noreply.github.com",
             "role": "Developer"
         }
     ],
     "require": {
         "php": "^8.3",
-        "spatie/laravel-package-tools": "^1.16",
-        "illuminate/contracts": "^10.0||^11.0||^12.0"
+        "illuminate/contracts": "^10.0||^11.0||^12.0",
+        "symfony/finder": "^6.0||^7.0"
     },
     "require-dev": {
         "laravel/pint": "^1.14",
@@ -30,18 +30,17 @@
         "pestphp/pest-plugin-laravel": "^2.0||^3.0",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan-deprecation-rules": "^1.1||^2.0",
-        "phpstan/phpstan-phpunit": "^1.3||^2.0",
-        "spatie/laravel-ray": "^1.35"
+        "phpstan/phpstan-phpunit": "^1.3||^2.0"
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "Olivermbs\\LaravelEnumshare\\": "src/",
+            "Olivermbs\\LaravelEnumshare\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/",
+            "Olivermbs\\LaravelEnumshare\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -63,10 +62,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "Olivermbs\\LaravelEnumshare\\LaravelEnumshareServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "LaravelEnumshare": "Olivermbs\\LaravelEnumshare\\Facades\\LaravelEnumshare"
             }
         }
     },

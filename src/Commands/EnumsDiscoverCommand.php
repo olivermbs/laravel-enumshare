@@ -1,0 +1,60 @@
+<?php
+
+namespace Olivermbs\LaravelEnumshare\Commands;
+
+use Illuminate\Console\Command;
+use Olivermbs\LaravelEnumshare\Support\EnumAutoDiscovery;
+
+class EnumsDiscoverCommand extends Command
+{
+    protected $signature = 'enums:discover 
+                            {--clear : Clear cached discovered enums first}';
+
+    protected $description = 'Discover enums that implement the FrontendEnum contract';
+
+    public function handle(): int
+    {
+        if (! config('enumshare.autodiscovery.enabled', false)) {
+            $this->error('Enum autodiscovery is not enabled. Enable it in config/enumshare.php');
+
+            return self::FAILURE;
+        }
+
+        $discovery = new EnumAutoDiscovery(
+            config('enumshare.autodiscovery.paths', []),
+            config('enumshare.autodiscovery.namespaces', []),
+            config('enumshare.autodiscovery.cache', [])
+        );
+
+        if ($this->option('clear')) {
+            $this->info('Clearing cached discovered enums...');
+            $discovery->clearCache();
+        }
+
+        $this->info('Discovering enums...');
+
+        $discoveredEnums = $discovery->discover();
+
+        if (empty($discoveredEnums)) {
+            $this->warn('No enums found that implement the FrontendEnum contract.');
+            $this->line('Make sure your enums:');
+            $this->line('  - Implement Olivermbs\LaravelEnumshare\Contracts\FrontendEnum');
+            $this->line('  - Use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend trait');
+            $this->line('  - Are located in the configured paths');
+
+            return self::SUCCESS;
+        }
+
+        $this->info('Found '.count($discoveredEnums).' enum(s):');
+
+        foreach ($discoveredEnums as $enum) {
+            $this->line("  - {$enum}");
+        }
+
+        if (config('enumshare.autodiscovery.cache.enabled', false)) {
+            $this->comment('Results cached for performance. Use --clear to refresh.');
+        }
+
+        return self::SUCCESS;
+    }
+}

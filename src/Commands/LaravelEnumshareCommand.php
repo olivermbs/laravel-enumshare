@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Oliver Smith\LaravelEnumshare\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class LaravelEnumshareCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'laravel-enumshare';
 
     public $description = 'My command';
 
