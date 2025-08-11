@@ -92,4 +92,36 @@ export function buildEnums(manifest: Record<string, EnumData>): Record<string, E
   return enums;
 }
 
+let cachedEnums: Record<string, EnumProxy> | null = null;
+
+export function getEnum<T extends EnumProxy = EnumProxy>(
+  enumName: string, 
+  manifest?: Record<string, EnumData>
+): T {
+  if (!cachedEnums) {
+    if (!manifest) {
+      throw new Error('Manifest must be provided on first call to getEnum');
+    }
+    cachedEnums = buildEnums(manifest);
+  }
+  
+  const enumProxy = cachedEnums[enumName];
+  if (!enumProxy) {
+    throw new Error(`Enum '${enumName}' not found in manifest`);
+  }
+  
+  return enumProxy as T;
+}
+
+export function getAllEnums(manifest?: Record<string, EnumData>): Record<string, EnumProxy> {
+  if (!cachedEnums) {
+    if (!manifest) {
+      throw new Error('Manifest must be provided on first call to getAllEnums');
+    }
+    cachedEnums = buildEnums(manifest);
+  }
+  
+  return cachedEnums;
+}
+
 export default buildEnums;

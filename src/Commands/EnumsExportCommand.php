@@ -8,7 +8,7 @@ use Olivermbs\LaravelEnumshare\Support\EnumRegistry;
 
 class EnumsExportCommand extends Command
 {
-    protected $signature = 'enums:export 
+    protected $signature = 'enums:export
                             {--path= : Override the JSON export path}
                             {--types= : Override the TypeScript definitions path}
                             {--locale= : Override the locale for label generation}';
@@ -36,6 +36,8 @@ class EnumsExportCommand extends Command
 
         $this->writeJsonManifest($manifest, $jsonPath);
         $this->writeTypeScriptDefinitions($manifest, $typesPath);
+
+        $this->writeIndividualEnumFiles($manifest, dirname($jsonPath));
 
         $enumCount = count($manifest);
         $this->info("✅ Exported {$enumCount} enum(s) to:");
@@ -126,6 +128,70 @@ class EnumsExportCommand extends Command
 
         $content .= "declare const Enums: EnumsMap;\n";
         $content .= "export default Enums;\n";
+
+        return $content;
+    }
+
+    protected function writeIndividualEnumFiles(array $manifest, string $enumsDir): void
+    {
+        foreach ($manifest as $enumName => $enumData) {
+            $content = $this->generateIndividualEnumFile($enumName, $enumData);
+            $filePath = "{$enumsDir}/{$enumName}.ts";
+            File::put($filePath, $content);
+        }
+    }
+
+    protected function generateIndividualEnumFile(string $enumName, array $enumData): string
+    {
+        $content = "// This file is auto-generated. Do not edit manually.\n";
+        $content .= "import { createEnumProxy, type EnumProxy } from './EnumRuntime';\n\n";
+
+        // Generate the enum data as a constant
+        $enumDataJson = json_encode($enumData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $content .= "const {$enumName}Data = {$enumDataJson};\n\n";
+
+        // Generate TypeScript types
+        $keys = array_map(fn ($entry) => "'{$entry['key']}'", $enumData['entries']);
+        $keyUnion = implode(' | ', $keys);
+
+        if ($enumData['backingType'] === 'string') {
+            $values = array_map(fn ($entry) => "'{$entry['value']}'", $enumData['entries']);
+        } elseif ($enumData['backingType'] === 'int') {
+            $values = array_map(fn ($entry) => $entry['value'], $enumData['entries']);
+        } else {
+            $values = $keys;
+        }
+        $valueUnion = implode(' | ', $values);
+
+        $content .= "export type {$enumName}Key = {$keyUnion};\n";
+        $content .= "export type {$enumName}Value = {$valueUnion};\n\n";
+
+        $content .= "export interface {$enumName}Entry {\n";
+        $content .= "  key: {$enumName}Key;\n";
+        $content .= '  value: '.($enumData['backingType'] ? "{$enumName}Value" : 'null').";\n";
+        $content .= "  label: string;\n";
+        $content .= "  meta: Record<string, any>;\n";
+        $content .= "}\n\n";
+
+        $content .= "export interface {$enumName}Option {\n";
+        $content .= "  value: {$enumName}Value;\n";
+        $content .= "  label: string;\n";
+        $content .= "}\n\n";
+
+        // Generate the enum proxy interface
+        $entryRecord = "Record<{$enumName}Key, {$enumName}Entry>";
+        $content .= "export interface {$enumName}Enum extends {$entryRecord} {\n";
+        $content .= "  name: string;\n";
+        $content .= "  entries: {$enumName}Entry[];\n";
+        $content .= "  options: {$enumName}Option[];\n";
+        $content .= "  keys(): {$enumName}Key[];\n";
+        $content .= "  values(): {$enumName}Value[];\n";
+        $content .= "  labels(): string[];\n";
+        $content .= "}\n\n";
+
+        // Export the enum instance
+        $content .= "export const {$enumName}: {$enumName}Enum = createEnumProxy({$enumName}Data) as {$enumName}Enum;\n";
+        $content .= "export default {$enumName};\n";
 
         return $content;
     }

@@ -94,17 +94,16 @@ php artisan enums:export
 This creates:
 - `resources/js/enums/enums.generated.json` - The enum data
 - `resources/js/enums/enums.generated.d.ts` - TypeScript definitions
+- `resources/js/enums/{EnumName}.ts` - Individual importable enum files
 
 ### 4. Use in Frontend
 
-Import and use your enums in TypeScript/JavaScript:
+#### Option A: Direct Import (Recommended)
+
+Import individual enums directly - no setup required:
 
 ```typescript
-import manifest from '@/enums/enums.generated.json';
-import { buildEnums } from '@/enums/EnumRuntime';
-
-export const Enums = buildEnums(manifest);
-const { TripStatus } = Enums;
+import { TripStatus } from '@/enums/TripStatus';
 
 // Type-safe access with IntelliSense
 console.log(TripStatus.Saved.value);        // 'saved'
@@ -125,7 +124,49 @@ if (order.status === TripStatus.Confirmed.value) {
 }
 ```
 
+#### Option B: Bulk Import
+
+For legacy code or if you prefer the original approach:
+
+```typescript
+import manifest from '@/enums/enums.generated.json';
+import { buildEnums } from '@/enums/EnumRuntime';
+
+export const Enums = buildEnums(manifest);
+const { TripStatus } = Enums;
+
+// Same API as Option A
+console.log(TripStatus.Saved.value);
+```
+
+#### Option C: Helper Functions
+
+Use the new helper functions for dynamic access:
+
+```typescript
+import manifest from '@/enums/enums.generated.json';
+import { getEnum, getAllEnums } from '@/enums/EnumRuntime';
+
+// Get a specific enum (provide manifest on first call)
+const TripStatus = getEnum('TripStatus', manifest);
+
+// Subsequent calls don't need manifest (cached)
+const UserRole = getEnum('UserRole');
+
+// Get all enums at once
+const allEnums = getAllEnums(manifest);
+```
+
 ## Features
+
+### Direct Import Support
+
+✨ **New in v2**: Import enums directly without setup boilerplate!
+
+```typescript
+// Just one import - no setup required
+import { TripStatus } from '@/enums/TripStatus';
+```
 
 ### Attributes
 

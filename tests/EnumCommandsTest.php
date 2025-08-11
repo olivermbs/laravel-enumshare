@@ -99,6 +99,36 @@ class EnumCommandsTest extends TestCase
         File::delete($typesPath);
     }
 
+    public function test_enums_export_generates_individual_files(): void
+    {
+        $this->createTestEnumFile();
+
+        $tempDir = sys_get_temp_dir().'/enumshare-test-'.time();
+        $jsonPath = $tempDir.'/enums.generated.json';
+        $typesPath = $tempDir.'/enums.generated.d.ts';
+
+        $this->artisan('enums:export', [
+            '--path' => $jsonPath,
+            '--types' => $typesPath,
+        ])->assertSuccessful();
+
+        // Check individual enum file is created
+        expect(File::exists($tempDir.'/CommandTestEnum.ts'))->toBeTrue();
+
+        // Check CommandTestEnum file content
+        $enumContent = File::get($tempDir.'/CommandTestEnum.ts');
+        expect($enumContent)
+            ->toContain('export const CommandTestEnum')
+            ->toContain('export type CommandTestEnumKey')
+            ->toContain('export type CommandTestEnumValue')
+            ->toContain('createEnumProxy')
+            ->toContain("'Active' | 'Inactive'")
+            ->toContain("'active' | 'inactive'");
+
+        // Clean up
+        File::deleteDirectory($tempDir);
+    }
+
     protected function createTestEnumFile(): void
     {
         $directory = $this->testEnumsPath.'/App/Enums';
