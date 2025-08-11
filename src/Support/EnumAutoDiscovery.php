@@ -100,6 +100,4 @@ class EnumAutoDiscovery
             return false;
         }
     }
-
-
 }

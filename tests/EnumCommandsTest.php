@@ -57,7 +57,6 @@ class EnumCommandsTest extends TestCase
             ->assertSuccessful();
     }
 
-
     public function test_enums_export_works_with_autodiscovery(): void
     {
         $this->createTestEnumFile();
@@ -82,7 +81,6 @@ class EnumCommandsTest extends TestCase
         // Clean up
         File::deleteDirectory($tempDir);
     }
-
 
     protected function createTestEnumFile(): void
     {

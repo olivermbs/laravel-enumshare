@@ -69,7 +69,6 @@ class EnumsExportAllLocalesCommand extends Command
         }
     }
 
-
     protected function writeIndividualEnumFiles(array $manifest, string $enumsDir, string $locale): void
     {
         foreach ($manifest as $enumName => $enumData) {
@@ -78,7 +77,6 @@ class EnumsExportAllLocalesCommand extends Command
             File::put($filePath, $content);
         }
     }
-
 
     protected function generateIndividualEnumFile(string $enumName, array $enumData, string $locale): string
     {

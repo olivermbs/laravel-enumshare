@@ -46,8 +46,6 @@ class EnumsExportCommand extends Command
         }
     }
 
-
-
     protected function writeIndividualEnumFiles(array $manifest, string $enumsDir): void
     {
         foreach ($manifest as $enumName => $enumData) {
