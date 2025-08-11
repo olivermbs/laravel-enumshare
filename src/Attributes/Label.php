@@ -8,6 +8,10 @@ use Attribute;
 class Label
 {
     public function __construct(
-        public readonly string $text
-    ) {}
+        string $text
+    ) {
+        $this->text = (string) $text;
+    }
+    
+    public readonly string $text;
 }
