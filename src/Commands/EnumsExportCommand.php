@@ -102,6 +102,7 @@ class EnumsExportCommand extends Command
         $content .= "  values(): {$enumName}Value[];\n";
         $content .= "  labels(): string[];\n";
         $content .= "  from(value: {$enumName}Value): {$enumName}Entry | null;\n";
+        $content .= "  fromValue(value: {$enumName}Value): {$enumName}Entry | null;\n";
         $content .= "}\n\n";
 
         // Export the enum instance
