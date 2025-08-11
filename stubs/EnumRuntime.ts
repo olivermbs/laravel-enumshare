@@ -29,6 +29,7 @@ export interface EnumProxy extends Record<string, EnumEntry> {
   values(): (string | number)[];
   labels(): string[];
   from(value: string | number): EnumEntry | null;
+  findByValue(value: string | number): EnumEntry | null;
 }
 
 export function createEnumProxy(enumData: EnumData): EnumProxy {
@@ -50,12 +51,15 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
   } as any;
   
   // Add the from method explicitly to avoid conflicts
-  baseObject.from = (value: string | number) => {
+  const findEntryByValue = (value: string | number) => {
     const entry = enumData.entries.find(entry => 
       (entry.value !== null ? entry.value : entry.key) === value
     );
     return entry || null;
   };
+  
+  baseObject.from = findEntryByValue;
+  baseObject.findByValue = findEntryByValue;
   
   // Debug: Check if from method exists
   console.log('createEnumProxy baseObject.from:', typeof baseObject.from);
