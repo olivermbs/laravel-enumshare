@@ -19,7 +19,7 @@ export interface EnumOption {
 export interface EnumData {
   name: string;
   fqcn: string;
-  backingType: 'string' | 'int' | null;
+  backingType: string | null;
   entries: EnumEntry[];
   options: EnumOption[];
 }
