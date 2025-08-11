@@ -3,11 +3,13 @@
 namespace Olivermbs\LaravelEnumshare\Concerns;
 
 use BackedEnum;
+use Olivermbs\LaravelEnumshare\Attributes\ExportMethod;
 use Olivermbs\LaravelEnumshare\Attributes\Label;
 use Olivermbs\LaravelEnumshare\Attributes\Meta;
 use Olivermbs\LaravelEnumshare\Attributes\TranslatedLabel;
 use ReflectionClass;
 use ReflectionClassConstant;
+use ReflectionMethod;
 
 trait SharesWithFrontend
 {
@@ -41,6 +43,10 @@ trait SharesWithFrontend
                 'label' => $label,
                 'meta' => $meta,
             ];
+
+            // Add custom method results as properties
+            $customProperties = static::resolveCustomMethods($case, $reflection);
+            $entry = array_merge($entry, $customProperties);
 
             $entries[] = $entry;
 
@@ -115,5 +121,36 @@ trait SharesWithFrontend
         }
 
         return [];
+    }
+
+    protected static function resolveCustomMethods($case, ReflectionClass $enumReflection): array
+    {
+        $methods = [];
+        $enumMethods = $enumReflection->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        foreach ($enumMethods as $method) {
+            $exportAttributes = $method->getAttributes(ExportMethod::class);
+            
+            if (!empty($exportAttributes)) {
+                $exportMethod = $exportAttributes[0]->newInstance();
+                $methodName = $exportMethod->name ?? $method->getName();
+                
+                // Skip methods with parameters for now (could be extended later)
+                if ($method->getNumberOfParameters() > 0) {
+                    continue;
+                }
+                
+                // Call the method on the case and get the result
+                try {
+                    $result = $case->{$method->getName()}();
+                    $methods[$methodName] = $result;
+                } catch (\Throwable $e) {
+                    // Skip methods that throw exceptions
+                    continue;
+                }
+            }
+        }
+
+        return $methods;
     }
 }

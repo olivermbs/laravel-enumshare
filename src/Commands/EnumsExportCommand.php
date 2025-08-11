@@ -74,6 +74,9 @@ class EnumsExportCommand extends Command
         $content = "// This file is auto-generated. Do not edit manually.\n";
         $content .= "import { buildEnum } from './EnumRuntime';\n\n";
 
+        // Ensure meta properties are objects, not arrays
+        $enumData = $this->ensureMetaIsObject($enumData);
+
         // Generate the enum data as a const assertion for full type inference
         $enumDataJson = json_encode($enumData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         $content .= "const {$enumName}Data = {$enumDataJson} as const;\n\n";
@@ -84,5 +87,18 @@ class EnumsExportCommand extends Command
         $content .= "export default {$enumName};\n";
 
         return $content;
+    }
+
+    protected function ensureMetaIsObject(array $enumData): array
+    {
+        if (isset($enumData['entries'])) {
+            foreach ($enumData['entries'] as &$entry) {
+                if (isset($entry['meta']) && is_array($entry['meta']) && empty($entry['meta'])) {
+                    $entry['meta'] = (object) [];
+                }
+            }
+        }
+
+        return $enumData;
     }
 }

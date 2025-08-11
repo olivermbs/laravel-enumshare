@@ -33,6 +33,7 @@ Create an enum that implements the `FrontendEnum` contract and uses the `SharesW
 
 namespace App\Enums;
 
+use Olivermbs\LaravelEnumshare\Attributes\ExportMethod;
 use Olivermbs\LaravelEnumshare\Attributes\Label;
 use Olivermbs\LaravelEnumshare\Attributes\Meta;
 use Olivermbs\LaravelEnumshare\Attributes\TranslatedLabel;
@@ -52,6 +53,18 @@ enum TripStatus: string implements FrontendEnum
     case Confirmed = 'confirmed';
     
     case Cancelled = 'cancelled';
+
+    #[ExportMethod]
+    public function isActive(): bool
+    {
+        return $this !== self::Cancelled;
+    }
+
+    #[ExportMethod('canBeModified')]
+    public function allowsChanges(): bool
+    {
+        return $this === self::Saved;
+    }
 }
 ```
 
@@ -199,6 +212,7 @@ wayfinder({
 - **`@Label`**: Custom display labels for enum cases
 - **`@TranslatedLabel`**: Translation-based labels with multi-locale support
 - **`@Meta`**: Arbitrary metadata (colors, icons, descriptions, etc.)
+- **`@ExportMethod`**: Export method results as static properties in TypeScript
 
 ### Label Resolution
 
@@ -300,6 +314,197 @@ return [
         en: "Pending Order",
         fr: "Commande en attente",
         es: "Pedido pendiente"
+    }
+}
+```
+
+## Custom Method Export
+
+Export method results as static properties using the `@ExportMethod` attribute. This allows you to include computed properties and business logic in your frontend enums.
+
+### Basic Usage
+
+```php
+<?php
+
+namespace App\Enums;
+
+use Olivermbs\LaravelEnumshare\Attributes\ExportMethod;
+use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
+use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
+
+enum ContactType: int implements FrontendEnum
+{
+    use SharesWithFrontend;
+
+    case EMAIL = 1;
+    case PHONE = 2;
+    case SMS = 3;
+    case POSTAL = 4;
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::EMAIL => 'Email',
+            self::PHONE => 'Phone',
+            self::SMS => 'SMS',
+            self::POSTAL => 'Postal Mail',
+        };
+    }
+
+    #[ExportMethod]
+    public function isInstant(): bool
+    {
+        return $this !== self::POSTAL;
+    }
+
+    #[ExportMethod('requiresPhoneNumber')]
+    public function needsPhone(): bool
+    {
+        return match ($this) {
+            self::PHONE, self::SMS => true,
+            default => false,
+        };
+    }
+}
+```
+
+### Generated TypeScript
+
+The exported TypeScript will include method results as properties:
+
+```typescript
+// ContactType.ts
+const ContactTypeData = {
+  "entries": [
+    {
+      "key": "EMAIL",
+      "value": 1,
+      "label": "Email",
+      "meta": {},
+      "isInstant": true,
+      "requiresPhoneNumber": false
+    },
+    {
+      "key": "PHONE",
+      "value": 2,
+      "label": "Phone", 
+      "meta": {},
+      "isInstant": true,
+      "requiresPhoneNumber": true
+    },
+    {
+      "key": "POSTAL",
+      "value": 4,
+      "label": "Postal Mail",
+      "meta": {},
+      "isInstant": false,
+      "requiresPhoneNumber": false
+    }
+  ]
+} as const;
+```
+
+### Frontend Usage
+
+Access method results as properties in your frontend code:
+
+```typescript
+import { ContactType } from '@/enums/ContactType';
+
+// Access computed properties
+console.log(ContactType.EMAIL.isInstant);           // true
+console.log(ContactType.POSTAL.isInstant);          // false
+console.log(ContactType.PHONE.requiresPhoneNumber); // true
+
+// Use in conditional logic
+const contactMethods = ContactType.entries.filter(method => 
+    method.isInstant && !method.requiresPhoneNumber
+);
+// Returns: [EMAIL entry]
+
+// React/Vue component example
+const ContactForm = () => {
+    const [selectedType, setSelectedType] = useState(ContactType.EMAIL.value);
+    const selectedEntry = ContactType.from(selectedType);
+    
+    return (
+        <div>
+            <select onChange={(e) => setSelectedType(e.target.value)}>
+                {ContactType.options.map(option => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+            
+            {selectedEntry?.requiresPhoneNumber && (
+                <input type="tel" placeholder="Phone number required" />
+            )}
+            
+            {selectedEntry?.isInstant && (
+                <p>This contact method delivers instantly!</p>
+            )}
+        </div>
+    );
+};
+```
+
+### Custom Property Names
+
+Use the optional parameter to customize the exported property name:
+
+```php
+#[ExportMethod('isUrgent')]
+public function canHandleUrgentRequests(): bool
+{
+    return $this === self::PHONE || $this === self::EMAIL;
+}
+```
+
+### Requirements
+
+- Methods must be **public** and take **no parameters**
+- Methods should return **serializable values** (bool, string, int, array, etc.)
+- Methods that throw exceptions will be skipped during export
+- Only methods with the `@ExportMethod` attribute are exported
+
+### Use Cases
+
+- **Business logic**: Export validation rules, permissions, or business constraints
+- **UI helpers**: Color schemes, icons, display preferences
+- **Computed properties**: Derived values based on enum state
+- **Feature flags**: Enable/disable functionality per enum case
+
+```php
+enum UserRole: string implements FrontendEnum
+{
+    use SharesWithFrontend;
+
+    case ADMIN = 'admin';
+    case MODERATOR = 'moderator'; 
+    case USER = 'user';
+
+    #[ExportMethod]
+    public function canModerate(): bool
+    {
+        return $this !== self::USER;
+    }
+
+    #[ExportMethod('hasFullAccess')]
+    public function isAdmin(): bool
+    {
+        return $this === self::ADMIN;
+    }
+
+    #[ExportMethod]
+    public function getPermissionLevel(): int
+    {
+        return match($this) {
+            self::ADMIN => 100,
+            self::MODERATOR => 50,
+            self::USER => 10,
+        };
     }
 }
 ```

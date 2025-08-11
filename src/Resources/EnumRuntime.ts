@@ -8,6 +8,7 @@ export type EnumEntry<K extends string, V extends Backing | null, M extends Reco
   value: V;
   label: string;
   meta: M;
+  [key: string]: any; // Allow additional properties from exported methods
 }>;
 
 export type EnumOption<V extends Backing> = Readonly<{
