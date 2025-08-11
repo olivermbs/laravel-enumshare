@@ -57,9 +57,18 @@ export function createEnumProxy(enumData: EnumData): EnumProxy {
     return entry || null;
   };
   
+  // Debug: Check if from method exists
+  console.log('createEnumProxy baseObject.from:', typeof baseObject.from);
+  console.log('createEnumProxy baseObject keys:', Object.keys(baseObject));
+  
   // Create proxy to handle dynamic property access
   return new Proxy(baseObject, {
     get(target: any, prop: string | symbol) {
+      // Debug: Log what's being accessed
+      if (prop === 'from') {
+        console.log('Proxy get "from":', typeof target[prop], target[prop]);
+      }
+      
       if (typeof prop === 'string' && entriesMap[prop]) {
         return entriesMap[prop];
       }
