@@ -1,12 +1,15 @@
 {
-    "name": "37539998-olivermbs/laravel-enumshare",
-    "description": "This is my package laravel-enumshare",
+    "name": "olivermbs/laravel-enumshare",
+    "description": "Export PHP Enums to TypeScript/Inertia with labels, metadata, and type-safe frontend access",
     "keywords": [
-        "Oliver Smith",
         "laravel",
-        "laravel-enumshare"
+        "enum",
+        "typescript",
+        "inertia",
+        "frontend",
+        "serialization"
     ],
-    "homepage": "https://github.com/37539998-olivermbs/laravel-enumshare",
+    "homepage": "https://github.com/olivermbs/laravel-enumshare",
     "license": "MIT",
     "authors": [
         {
