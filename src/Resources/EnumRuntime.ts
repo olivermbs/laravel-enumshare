@@ -8,7 +8,6 @@ export type EnumEntry<K extends string, V extends Backing | null, M extends Reco
   value: V;
   label: string;
   meta: M;
-  [key: string]: any; // Allow additional properties from exported methods
 }>;
 
 export type EnumOption<V extends Backing> = Readonly<{
@@ -19,9 +18,9 @@ export type EnumOption<V extends Backing> = Readonly<{
 export type EnumData<K extends string, V extends Backing, M extends Record<string, unknown>> = Readonly<{
   name: string;
   fqcn: string;
-  backingType: 'int' | 'string' | string;
-  entries: ReadonlyArray<EnumEntry<K, V | null, M>>;
-  options: ReadonlyArray<EnumOption<V>>;
+  backingType: string;
+  entries: readonly EnumEntry<K, V | null, M>[];
+  options: readonly EnumOption<V>[];
 }>;
 
 export type EnumObject<
@@ -31,11 +30,11 @@ export type EnumObject<
 > = Readonly<
   {
     name: string;
-    entries: ReadonlyArray<EnumEntry<K, V | null, M>>;
-    options: ReadonlyArray<EnumOption<V>>;
-    keys(): ReadonlyArray<K>;
-    values(): ReadonlyArray<V | K>;
-    labels(): ReadonlyArray<string>;
+    entries: readonly EnumEntry<K, V | null, M>[];
+    options: readonly EnumOption<V>[];
+    keys(): readonly K[];
+    values(): readonly (V | K)[];
+    labels(): readonly string[];
     from(value: V | K | null | undefined): EnumEntry<K, V | null, M> | null;
     tryFrom(value: unknown): EnumEntry<K, V | null, M> | null;
     hasKey(key: unknown): key is K;
@@ -44,22 +43,24 @@ export type EnumObject<
 >;
 
 /** Build a plain, frozen enum object. No Proxy. */
-export function buildEnum<
-  const K extends string,
-  const V extends Backing,
-  const M extends Record<string, unknown> = Record<string, unknown>
->(data: EnumData<K, V, M>): EnumObject<K, V, M> {
+export function buildEnum<T extends Record<string, any>>(
+  data: T
+): EnumObject<
+  T['entries'][number]['key'],
+  T['entries'][number]['value'],
+  T['entries'][number]['meta']
+> {
   const obj = Object.create(null) as Record<string, unknown>;
 
-  const entries = Object.freeze(data.entries.map(e => Object.freeze({ ...e }))) as ReadonlyArray<EnumEntry<K, V | null, M>>;
-  const options = Object.freeze(data.options.map(o => Object.freeze({ ...o }))) as ReadonlyArray<EnumOption<V>>;
+  const entries = Object.freeze(data.entries.map((e: any) => Object.freeze({ ...e })));
+  const options = Object.freeze(data.options.map((o: any) => Object.freeze({ ...o })));
 
-  const byKey = new Map<K, EnumEntry<K, V | null, M>>();
-  const byValue = new Map<V | K, EnumEntry<K, V | null, M>>();
+  const byKey = new Map<string, any>();
+  const byValue = new Map<any, any>();
 
   for (const e of entries) {
     byKey.set(e.key, e);
-    byValue.set((e.value ?? e.key) as V | K, e);
+    byValue.set(e.value ?? e.key, e);
     Object.defineProperty(obj, e.key, {
       value: e,
       enumerable: true,
@@ -68,46 +69,46 @@ export function buildEnum<
     });
   }
 
-  let _keys: ReadonlyArray<K> | undefined;
-  let _values: ReadonlyArray<V | K> | undefined;
-  let _labels: ReadonlyArray<string> | undefined;
+  let _keys: readonly string[] | undefined;
+  let _values: readonly any[] | undefined;
+  let _labels: readonly string[] | undefined;
 
   const api = {
     name: data.name,
     entries,
     options,
-    keys(): ReadonlyArray<K> {
-      return (_keys ??= entries.map(e => e.key) as ReadonlyArray<K>);
+    keys() {
+      return (_keys ??= entries.map((e: any) => e.key));
     },
-    values(): ReadonlyArray<V | K> {
-      return (_values ??= entries.map(e => (e.value ?? e.key) as V | K));
+    values() {
+      return (_values ??= entries.map((e: any) => e.value ?? e.key));
     },
-    labels(): ReadonlyArray<string> {
-      return (_labels ??= entries.map(e => e.label));
+    labels() {
+      return (_labels ??= entries.map((e: any) => e.label));
     },
-    from(value: V | K | null | undefined) {
+    from(value: any) {
       if (value == null) return null;
-      return byValue.get(value as V | K) ?? null;
+      return byValue.get(value) ?? null;
     },
     tryFrom(value: unknown) {
-      if (byValue.has(value as V | K)) return byValue.get(value as V | K)!;
+      if (byValue.has(value)) return byValue.get(value)!;
       if (typeof value === 'string') {
-        if (byKey.has(value as K)) return byKey.get(value as K)!;
+        if (byKey.has(value)) return byKey.get(value)!;
         const n = Number(value);
-        if (!Number.isNaN(n) && byValue.has(n as V)) return byValue.get(n as V)!;
+        if (!Number.isNaN(n) && byValue.has(n)) return byValue.get(n)!;
       }
       return null;
     },
-    hasKey(k: unknown): k is K {
-      return typeof k === 'string' && byKey.has(k as K);
+    hasKey(k: unknown) {
+      return typeof k === 'string' && byKey.has(k);
     },
-    hasValue(v: unknown): v is V | K {
-      return byValue.has(v as V | K);
+    hasValue(v: unknown) {
+      return byValue.has(v);
     },
   } as const;
 
   const full = Object.assign(obj, api);
-  return Object.freeze(full) as EnumObject<K, V, M>;
+  return Object.freeze(full) as any;
 }
 
 // Legacy compatibility functions
