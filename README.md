@@ -22,6 +22,21 @@ Publish the configuration file:
 php artisan vendor:publish --tag="enumshare-config"
 ```
 
+## TypeScript Configuration
+
+For TypeScript projects, ensure your `tsconfig.json` includes ES2015 or later to support the `Map` type used by the enum runtime:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "lib": ["ES2015", "DOM"]
+  }
+}
+```
+
+Or use `"target": "ES2020"` or later which includes ES2015 features by default.
+
 ## Quickstart
 
 ### 1. Create Your Enum
