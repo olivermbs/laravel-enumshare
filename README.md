@@ -26,7 +26,7 @@ php artisan vendor:publish --tag="enumshare-config"
 
 ### 1. Create Your Enum
 
-Create an enum that implements the `FrontendEnum` contract and uses the `SharesWithFrontend` trait:
+Create an enum that uses the `SharesWithFrontend` trait:
 
 ```php
 <?php
@@ -38,9 +38,7 @@ use Olivermbs\LaravelEnumshare\Attributes\Label;
 use Olivermbs\LaravelEnumshare\Attributes\Meta;
 use Olivermbs\LaravelEnumshare\Attributes\TranslatedLabel;
 use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
-use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
-
-enum TripStatus: string implements FrontendEnum
+enum TripStatus: string
 {
     use SharesWithFrontend;
     
@@ -256,7 +254,7 @@ php artisan enums:discover
 Use `@TranslatedLabel` for translation-based labels instead of hardcoded strings:
 
 ```php
-enum OrderStatus: string implements FrontendEnum
+enum OrderStatus: string
 {
     use SharesWithFrontend;
 
@@ -331,9 +329,7 @@ namespace App\Enums;
 
 use Olivermbs\LaravelEnumshare\Attributes\ExportMethod;
 use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
-use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
-
-enum ContactType: int implements FrontendEnum
+enum ContactType: int
 {
     use SharesWithFrontend;
 
@@ -477,7 +473,7 @@ public function canHandleUrgentRequests(): bool
 - **Feature flags**: Enable/disable functionality per enum case
 
 ```php
-enum UserRole: string implements FrontendEnum
+enum UserRole: string
 {
     use SharesWithFrontend;
 
@@ -536,7 +532,7 @@ php artisan enums:discover
 ### How It Works
 
 1. **Path Scanning**: Scans configured directories for PHP files containing enums
-2. **Interface Validation**: Only includes enums implementing `FrontendEnum` contract
+2. **Trait Validation**: Only includes enums using `SharesWithFrontend` trait
 3. **Combination**: Merges discovered enums with manually configured ones
 
 ### Environment Variables

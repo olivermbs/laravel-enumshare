@@ -3,7 +3,7 @@
 namespace Olivermbs\LaravelEnumshare\Support;
 
 use Illuminate\Support\Facades\File;
-use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
+use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
 use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\Finder\Finder;
@@ -95,7 +95,7 @@ class EnumAutoDiscovery
             $reflection = new ReflectionClass($enumClass);
 
             return $reflection->isEnum() &&
-                   $reflection->implementsInterface(FrontendEnum::class);
+                   in_array(SharesWithFrontend::class, $reflection->getTraitNames());
         } catch (ReflectionException) {
             return false;
         }

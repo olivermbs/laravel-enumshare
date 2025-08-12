@@ -9,7 +9,7 @@ class EnumsDiscoverCommand extends Command
 {
     protected $signature = 'enums:discover';
 
-    protected $description = 'Discover enums that implement the FrontendEnum contract';
+    protected $description = 'Discover enums that use the SharesWithFrontend trait';
 
     public function handle(): int
     {
@@ -28,9 +28,8 @@ class EnumsDiscoverCommand extends Command
         $discoveredEnums = $discovery->discover();
 
         if (empty($discoveredEnums)) {
-            $this->warn('No enums found that implement the FrontendEnum contract.');
+            $this->warn('No enums found that use the SharesWithFrontend trait.');
             $this->line('Make sure your enums:');
-            $this->line('  - Implement Olivermbs\LaravelEnumshare\Contracts\FrontendEnum');
             $this->line('  - Use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend trait');
             $this->line('  - Are located in the configured paths');
 

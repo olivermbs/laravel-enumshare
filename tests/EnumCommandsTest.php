@@ -53,7 +53,7 @@ class EnumCommandsTest extends TestCase
     {
         $this->artisan('enums:discover')
             ->expectsOutput('Discovering enums...')
-            ->expectsOutput('No enums found that implement the FrontendEnum contract.')
+            ->expectsOutput('No enums found that use the SharesWithFrontend trait.')
             ->assertSuccessful();
     }
 
@@ -92,9 +92,7 @@ class EnumCommandsTest extends TestCase
 namespace App\\Enums;
 
 use Olivermbs\\LaravelEnumshare\\Concerns\\SharesWithFrontend;
-use Olivermbs\\LaravelEnumshare\\Contracts\\FrontendEnum;
-
-enum CommandTestEnum: string implements FrontendEnum
+enum CommandTestEnum: string
 {
     use SharesWithFrontend;
     

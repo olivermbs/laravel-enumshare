@@ -4,9 +4,8 @@ namespace Tests;
 
 use Olivermbs\LaravelEnumshare\Attributes\ExportMethod;
 use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
-use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
 
-enum TestContactType: int implements FrontendEnum
+enum TestContactType: int
 {
     use SharesWithFrontend;
 

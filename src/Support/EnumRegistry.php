@@ -2,7 +2,7 @@
 
 namespace Olivermbs\LaravelEnumshare\Support;
 
-use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
+use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
 use ReflectionClass;
 
 class EnumRegistry
@@ -57,6 +57,6 @@ class EnumRegistry
         $reflection = new ReflectionClass($enumClass);
 
         return $reflection->isEnum() &&
-               $reflection->implementsInterface(FrontendEnum::class);
+               in_array(SharesWithFrontend::class, $reflection->getTraitNames());
     }
 }

@@ -4,11 +4,10 @@ use Olivermbs\LaravelEnumshare\Attributes\Label;
 use Olivermbs\LaravelEnumshare\Attributes\Meta;
 use Olivermbs\LaravelEnumshare\Attributes\TranslatedLabel;
 use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
-use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
 use Olivermbs\LaravelEnumshare\Support\EnumRegistry;
 use Olivermbs\LaravelEnumshare\Tests\TestCase;
 
-enum TripStatus: string implements FrontendEnum
+enum TripStatus: string
 {
     use SharesWithFrontend;
 
@@ -23,7 +22,7 @@ enum TripStatus: string implements FrontendEnum
     case Cancelled = 'cancelled';
 }
 
-enum UserRole implements FrontendEnum
+enum UserRole
 {
     use SharesWithFrontend;
 
@@ -32,7 +31,7 @@ enum UserRole implements FrontendEnum
     case Guest;
 }
 
-enum OrderStatus: string implements FrontendEnum
+enum OrderStatus: string
 {
     use SharesWithFrontend;
 

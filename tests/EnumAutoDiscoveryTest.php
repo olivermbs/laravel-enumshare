@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Olivermbs\LaravelEnumshare\Concerns\SharesWithFrontend;
-use Olivermbs\LaravelEnumshare\Contracts\FrontendEnum;
 use Olivermbs\LaravelEnumshare\Support\EnumAutoDiscovery;
 use Olivermbs\LaravelEnumshare\Support\EnumRegistry;
 use Olivermbs\LaravelEnumshare\Tests\TestCase;
@@ -86,7 +85,7 @@ class EnumAutoDiscoveryTest extends TestCase
     {
         // Create a class that's not an enum
         $this->createTestClassFile('NotAnEnum', 'App\\Enums');
-        // Create an enum that doesn't implement FrontendEnum
+        // Create an enum that doesn't use SharesWithFrontend
         $this->createInvalidEnumFile('InvalidEnum', 'App\\Enums');
 
         $discovery = new EnumAutoDiscovery(['test_enums']);
@@ -147,9 +146,7 @@ namespace {$namespace};
 
 use Olivermbs\\LaravelEnumshare\\Attributes\\Label;
 use Olivermbs\\LaravelEnumshare\\Concerns\\SharesWithFrontend;
-use Olivermbs\\LaravelEnumshare\\Contracts\\FrontendEnum;
-
-enum {$enumName}: string implements FrontendEnum
+enum {$enumName}: string
 {
     use SharesWithFrontend;
     
@@ -186,7 +183,7 @@ namespace {$namespace};
 enum {$enumName}: string
 {
     case Test = 'test';
-    // Doesn't implement FrontendEnum
+    // Doesn't use SharesWithFrontend
 }";
 
         File::put($this->testEnumsPath.'/'.$enumName.'.php', $content);
@@ -210,7 +207,7 @@ enum {$enumName}: string
 }
 
 // Test enum for configured enums testing
-enum TestConfiguredEnum: string implements FrontendEnum
+enum TestConfiguredEnum: string
 {
     use SharesWithFrontend;
 
