@@ -7,7 +7,7 @@
 
 Export PHP Enums to TypeScript with labels, metadata, and type-safe frontend access. Generate TypeScript definitions for seamless enum sharing between Laravel backends and frontend applications.
 
-> **New in v1.1.0:** Zero runtime dependencies, comprehensive JSDoc documentation, 10+ utility methods, and smart type detection. Now generates pure TypeScript with no build requirements!
+> **New in v0.1.0-alpha:** Zero runtime dependencies, comprehensive JSDoc documentation, 10+ utility methods, and smart type detection. Now generates pure TypeScript with no build requirements!
 
 
 ## Installation

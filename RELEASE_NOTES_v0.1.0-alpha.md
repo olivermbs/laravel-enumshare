@@ -1,4 +1,4 @@
-# 🚀 Laravel EnumShare v1.1.0-beta.1
+# 🚀 Laravel EnumShare v0.1.0-alpha
 
 ## Major Refactor: Blade-Based TypeScript Generation
 
@@ -51,7 +51,7 @@ const TripStatusData = { /* ... */ } as const;
 export const TripStatus = buildEnum(TripStatusData);
 ```
 
-**After (v1.1.0):**
+**After (v0.1.0-alpha):**
 ```typescript
 /**
  * TripStatus enum generated from App\Enums\TripStatus
@@ -133,7 +133,7 @@ All existing method calls remain the same:
 ## 📦 Installation
 
 ```bash
-composer require olivermbs/laravel-enumshare:^1.1.0-beta.1
+composer require olivermbs/laravel-enumshare:^0.1.0-alpha
 ```
 
 ## 🧪 Beta Notes
@@ -147,4 +147,4 @@ Updated documentation with all new features available in the [README](https://gi
 
 ---
 
-**What's Next:** Planning v1.1.0 stable release with additional performance optimizations and Vue/React integration helpers.
+**What's Next:** Planning v0.1.0 stable release with additional performance optimizations and Vue/React integration helpers.
