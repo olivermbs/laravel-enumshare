@@ -34,14 +34,12 @@ class LaravelEnumshareServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->loadViewsFrom(__DIR__.'/Resources/Views', 'enumshare');
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/enumshare.php' => config_path('enumshare.php'),
             ], 'enumshare-config');
-
-            $this->publishes([
-                __DIR__.'/../stubs/EnumRuntime.ts' => resource_path('js/enums/EnumRuntime.ts'),
-            ], 'enumshare-stubs');
 
             $this->commands([
                 EnumsExportCommand::class,

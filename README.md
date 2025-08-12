@@ -24,15 +24,7 @@ php artisan vendor:publish --tag="enumshare-config"
 
 ## TypeScript Configuration
 
-Ensure your `tsconfig.json` supports ES2015+ for the `Map` type:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2015"
-  }
-}
-```
+The generated TypeScript files are compatible with ES5+ and don't require any special configuration.
 
 ## Quick Start
 
@@ -138,6 +130,10 @@ console.log(TripStatus.Saved.meta);         // { color: 'gray', icon: 'save' }
 console.log(TripStatus.keys());             // ['Saved', 'Confirmed', 'Cancelled']
 console.log(TripStatus.values());           // ['saved', 'confirmed', 'cancelled']
 console.log(TripStatus.options);            // [{ value: 'saved', label: 'Trip Saved' }, ...]
+
+// Lookup methods
+console.log(TripStatus.from('saved'));      // TripStatus.Saved entry
+console.log(TripStatus.fromKey('Saved'));   // TripStatus.Saved entry
 
 // Use in conditionals
 if (trip.status === TripStatus.Confirmed.value) {

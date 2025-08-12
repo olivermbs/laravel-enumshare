@@ -13,6 +13,7 @@ return [
     |
     */
     'enums' => [
+        Tests\TestStatus::class,
         // App\Enums\TripStatus::class,
         // App\Enums\UserRole::class,
     ],

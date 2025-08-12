@@ -76,7 +76,9 @@ class EnumCommandsTest extends TestCase
         $enumContent = File::get($tempDir.'/CommandTestEnum.ts');
         expect($enumContent)
             ->toContain('export const CommandTestEnum')
-            ->toContain('buildEnum');
+            ->toContain('keys()')
+            ->toContain('values()')
+            ->toContain('from(');
 
         // Clean up
         File::deleteDirectory($tempDir);

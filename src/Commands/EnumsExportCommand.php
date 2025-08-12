@@ -4,6 +4,7 @@ namespace Olivermbs\LaravelEnumshare\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\View;
 use Olivermbs\LaravelEnumshare\Support\EnumRegistry;
 
 class EnumsExportCommand extends Command
@@ -48,9 +49,6 @@ class EnumsExportCommand extends Command
 
     protected function writeIndividualEnumFiles(array $manifest, string $enumsDir): void
     {
-        // Copy EnumRuntime.ts from package resources
-        $this->copyEnumRuntime($enumsDir);
-
         foreach ($manifest as $enumName => $enumData) {
             $content = $this->generateIndividualEnumFile($enumName, $enumData);
             $filePath = "{$enumsDir}/{$enumName}.ts";
@@ -58,35 +56,19 @@ class EnumsExportCommand extends Command
         }
     }
 
-    protected function copyEnumRuntime(string $enumsDir): void
-    {
-        $sourcePath = __DIR__.'/../Resources/EnumRuntime.ts';
-        $targetPath = "{$enumsDir}/EnumRuntime.ts";
-
-        if (File::exists($sourcePath)) {
-            File::copy($sourcePath, $targetPath);
-            $this->info('📋 Copied EnumRuntime.ts');
-        }
-    }
 
     protected function generateIndividualEnumFile(string $enumName, array $enumData): string
     {
-        $content = "// This file is auto-generated. Do not edit manually.\n";
-        $content .= "import { buildEnum } from './EnumRuntime';\n\n";
-
         // Ensure meta properties are objects, not arrays
         $enumData = $this->ensureMetaIsObject($enumData);
 
-        // Generate the enum data as a const assertion for full type inference
-        $enumDataJson = json_encode($enumData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        $content .= "const {$enumName}Data = {$enumDataJson} as const;\n\n";
-
-        // Export the enum instance with proper typing
-        $content .= "export const {$enumName} = buildEnum({$enumName}Data);\n";
-        $content .= "export type {$enumName} = typeof {$enumName};\n";
-        $content .= "export default {$enumName};\n";
-
-        return $content;
+        return View::make('enumshare::enum', [
+            'name' => $enumName,
+            'fqcn' => $enumData['fqcn'],
+            'backingType' => $enumData['backingType'],
+            'entries' => $enumData['entries'],
+            'options' => $enumData['options'],
+        ])->render();
     }
 
     protected function ensureMetaIsObject(array $enumData): array
