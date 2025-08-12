@@ -7,6 +7,8 @@
 
 Export PHP Enums to TypeScript with labels, metadata, and type-safe frontend access. Generate TypeScript definitions for seamless enum sharing between Laravel backends and frontend applications.
 
+> **New in v1.1.0:** Zero runtime dependencies, comprehensive JSDoc documentation, 10+ utility methods, and smart type detection. Now generates pure TypeScript with no build requirements!
+
 
 ## Installation
 
@@ -135,6 +137,16 @@ console.log(TripStatus.options);            // [{ value: 'saved', label: 'Trip S
 console.log(TripStatus.from('saved'));      // TripStatus.Saved entry
 console.log(TripStatus.fromKey('Saved'));   // TripStatus.Saved entry
 
+// Validation methods
+console.log(TripStatus.isValid('saved'));   // true
+console.log(TripStatus.hasKey('Saved'));    // true
+console.log(TripStatus.count);              // 3
+
+// Functional utilities
+console.log(TripStatus.random());           // Random enum entry
+console.log(TripStatus.filter(e => e.meta.color === 'green')); // [Confirmed entry]
+console.log(TripStatus.map(e => e.label));  // ['Trip Saved', 'Confirmed Trip', 'Cancelled']
+
 // Use in conditionals
 if (trip.status === TripStatus.Confirmed.value) {
     // Handle confirmed trip
@@ -143,12 +155,43 @@ if (trip.status === TripStatus.Confirmed.value) {
 
 ## Features
 
-- **Direct imports** - Import enums directly without setup boilerplate
+- **Zero runtime dependencies** - Pure static TypeScript generation, no build dependencies
+- **Rich utility methods** - 10+ utility methods including validation, filtering, and random selection
+- **Comprehensive JSDoc** - Full documentation with examples for perfect IDE IntelliSense
+- **Smart type detection** - Automatic PHP → TypeScript type mapping for meta properties
+- **Mixed label support** - Handles both simple strings and multilingual translations
 - **Auto-regeneration** - Automatic updates during development with Vite Wayfinder
 - **Attributes** - `@Label`, `@TranslatedLabel`, `@Meta`, `@ExportMethod` for rich enum data
 - **Multi-locale** - Built-in translation support for international apps
 - **TypeScript integration** - Strict definitions with IntelliSense support
 - **Method export** - Export computed properties and business logic
+
+## Rich TypeScript API
+
+Every generated enum comes with comprehensive utility methods and full JSDoc documentation:
+
+### Validation & Info
+```typescript
+TripStatus.isValid('saved')     // boolean - Check if value exists
+TripStatus.hasKey('Saved')      // boolean - Check if key exists  
+TripStatus.count               // number - Total enum entries
+```
+
+### Functional Utilities
+```typescript
+TripStatus.random()            // Get random enum entry
+TripStatus.filter(e => e.meta.color === 'green')  // Filter entries
+TripStatus.map(e => e.label)   // Transform entries
+TripStatus.find(e => e.value === 'saved')         // Find first match
+TripStatus.some(e => e.meta.urgent)               // Test if any match
+TripStatus.every(e => e.value !== null)           // Test if all match
+```
+
+### IDE Support
+- **Full JSDoc documentation** with usage examples
+- **Perfect IntelliSense** - Hover over any method for help
+- **Type-safe parameters** - TypeScript catches invalid usage
+- **Auto-completion** - IDE suggests all available methods
 
 ## Commands
 
@@ -283,34 +326,44 @@ enum ContactType: int
 The exported TypeScript will include method results as properties:
 
 ```typescript
-// ContactType.ts
-const ContactTypeData = {
-  "entries": [
-    {
-      "key": "EMAIL",
-      "value": 1,
-      "label": "Email",
-      "meta": {},
-      "isInstant": true,
-      "requiresPhoneNumber": false
-    },
-    {
-      "key": "PHONE",
-      "value": 2,
-      "label": "Phone", 
-      "meta": {},
-      "isInstant": true,
-      "requiresPhoneNumber": true
-    },
-    {
-      "key": "POSTAL",
-      "value": 4,
-      "label": "Postal Mail",
-      "meta": {},
-      "isInstant": false,
-      "requiresPhoneNumber": false
-    }
-  ]
+// ContactType.ts (generated)
+/**
+ * ContactType enum generated from App\Enums\ContactType
+ * 
+ * @example
+ * // Access enum entries
+ * ContactType.EMAIL.label // "Email"
+ * ContactType.PHONE.isInstant // true
+ * 
+ * // Lookup by value  
+ * ContactType.from(1) // EMAIL entry
+ * ContactType.from(2) // PHONE entry
+ */
+export const ContactType = {
+  /** Email */
+  EMAIL: {
+    key: 'EMAIL',
+    value: 1,
+    label: 'Email',
+    meta: {},
+    isInstant: true,
+    requiresPhoneNumber: false
+  },
+  /** Phone */  
+  PHONE: {
+    key: 'PHONE',
+    value: 2,
+    label: 'Phone',
+    meta: {},
+    isInstant: true, 
+    requiresPhoneNumber: true
+  },
+  
+  // Rich utility methods with full JSDoc
+  isValid: (value: unknown): boolean => { /* ... */ },
+  random: (): ContactTypeEntry => { /* ... */ },
+  filter: (predicate: (entry: ContactTypeEntry) => boolean) => { /* ... */ },
+  // ... 10+ more methods
 } as const;
 ```
 
