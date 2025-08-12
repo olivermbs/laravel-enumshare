@@ -1,9 +1,9 @@
 # Laravel EnumShare
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/37539998-olivermbs/laravel-enumshare.svg?style=flat-square)](https://packagist.org/packages/37539998-olivermbs/laravel-enumshare)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/37539998-olivermbs/laravel-enumshare/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/37539998-olivermbs/laravel-enumshare/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/37539998-olivermbs/laravel-enumshare/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/37539998-olivermbs/laravel-enumshare/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/37539998-olivermbs/laravel-enumshare.svg?style=flat-square)](https://packagist.org/packages/37539998-olivermbs/laravel-enumshare)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/olivermbs/laravel-enumshare.svg?style=flat-square)](https://packagist.org/packages/olivermbs/laravel-enumshare)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/olivermbs/laravel-enumshare/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/olivermbs/laravel-enumshare/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/olivermbs/laravel-enumshare/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/olivermbs/laravel-enumshare/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/olivermbs/laravel-enumshare.svg?style=flat-square)](https://packagist.org/packages/olivermbs/laravel-enumshare)
 
 Export PHP Enums to TypeScript with labels, metadata, and type-safe frontend access. Generate TypeScript definitions for seamless enum sharing between Laravel backends and frontend applications.
 
@@ -13,7 +13,7 @@ Export PHP Enums to TypeScript with labels, metadata, and type-safe frontend acc
 You can install the package via composer:
 
 ```bash
-composer require 37539998-olivermbs/laravel-enumshare
+composer require olivermbs/laravel-enumshare
 ```
 
 Publish the configuration file:
