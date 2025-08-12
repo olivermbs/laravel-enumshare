@@ -5,7 +5,7 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/37539998-olivermbs/laravel-enumshare/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/37539998-olivermbs/laravel-enumshare/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/37539998-olivermbs/laravel-enumshare.svg?style=flat-square)](https://packagist.org/packages/37539998-olivermbs/laravel-enumshare)
 
-Export PHP Enums to TypeScript/Inertia with labels, metadata, and type-safe frontend access. Generate JSON manifests and TypeScript definitions for seamless enum sharing between Laravel backends and frontend applications.
+Export PHP Enums to TypeScript with labels, metadata, and type-safe frontend access. Generate TypeScript definitions for seamless enum sharing between Laravel backends and frontend applications.
 
 
 ## Installation
@@ -24,24 +24,21 @@ php artisan vendor:publish --tag="enumshare-config"
 
 ## TypeScript Configuration
 
-For TypeScript projects, ensure your `tsconfig.json` includes ES2015 or later to support the `Map` type used by the enum runtime:
+Ensure your `tsconfig.json` supports ES2015+ for the `Map` type:
 
 ```json
 {
   "compilerOptions": {
-    "target": "ES2015",
-    "lib": ["ES2015", "DOM"]
+    "target": "ES2015"
   }
 }
 ```
 
-Or use `"target": "ES2020"` or later which includes ES2015 features by default.
+## Quick Start
 
-## Quickstart
+### 1. Create an Enum
 
-### 1. Create Your Enum
-
-Create an enum that uses the `SharesWithFrontend` trait:
+Create an enum with the `SharesWithFrontend` trait:
 
 ```php
 <?php
@@ -72,41 +69,29 @@ enum TripStatus: string
     {
         return $this !== self::Cancelled;
     }
-
-    #[ExportMethod('canBeModified')]
-    public function allowsChanges(): bool
-    {
-        return $this === self::Saved;
-    }
 }
 ```
 
-### 2. Configure Your Enums
+### 2. Configure Enums
 
-Add your enums to the configuration file:
+Add enums to the config file:
 
 ```php
 // config/enumshare.php
 return [
-    'strategy' => 'export',
     'enums' => [
         App\Enums\TripStatus::class,
         App\Enums\UserRole::class,
     ],
     'export' => [
         'path' => resource_path('js/enums'),
-        'locale' => null,
-        'locales' => [], // Multi-locale support for TranslatedLabel
     ],
-    'lang_namespace' => 'enums',
 ];
 ```
 
-### 3. Setup Auto-Regeneration (Optional but Recommended)
+### 3. Auto-Regeneration (Optional)
 
-**Option A: Vite Wayfinder (Recommended)**
-
-Install Laravel's Vite Wayfinder to automatically regenerate enums when files change:
+**Vite Wayfinder (Recommended)**
 
 ```bash
 npm install --save-dev @laravel/vite-plugin-wayfinder
@@ -114,58 +99,32 @@ npm install --save-dev @laravel/vite-plugin-wayfinder
 
 ```javascript
 // vite.config.js
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 
 export default defineConfig({
   plugins: [
-    laravel({
-      input: ['resources/css/app.css', 'resources/js/app.js'],
-      refresh: true,
-    }),
+    // ... other plugins
     wayfinder({
       command: 'php artisan enums:export',
-      patterns: [
-        'app/Enums/**/*.php',
-        'lang/*/enums.php', 
-        'config/enumshare.php'
-      ],
+      patterns: ['app/Enums/**/*.php', 'lang/*/enums.php'],
     }),
   ],
 });
 ```
 
-**Option B: Manual Watch Command**
-
-Run the watch command alongside your dev server:
+**Manual Watch**
 
 ```bash
-# Terminal 1
-npm run dev
-
-# Terminal 2  
 php artisan enums:watch
 ```
 
-### 4. Export Enums
-
-Run the export command to generate JSON manifest and TypeScript definitions:
+### 4. Export and Use
 
 ```bash
 php artisan enums:export
 ```
 
-This creates individual TypeScript files:
-- `resources/js/enums/TripStatus.ts` - Direct importable enum
-- `resources/js/enums/UserRole.ts` - Direct importable enum
-- `resources/js/enums/FlightBriefingStatus.ts` - Direct importable enum
-
-With Vite Wayfinder, this happens automatically when you change enum files!
-
-### 5. Use in Frontend
-
-Import individual enums directly - no setup required:
+Import directly in your frontend:
 
 ```typescript
 import { TripStatus } from '@/enums/TripStatus';
@@ -176,93 +135,36 @@ console.log(TripStatus.Saved.label);        // 'Trip Saved'
 console.log(TripStatus.Saved.meta);         // { color: 'gray', icon: 'save' }
 
 // Utility methods
-console.log(TripStatus.keys());              // ['Saved', 'Confirmed', 'Cancelled']
-console.log(TripStatus.values());            // ['saved', 'confirmed', 'cancelled']
-console.log(TripStatus.labels());            // ['Trip Saved', 'Confirmed Trip', 'Cancelled']
-
-// Options for select dropdowns
-console.log(TripStatus.options);             // [{ value: 'saved', label: 'Trip Saved' }, ...]
+console.log(TripStatus.keys());             // ['Saved', 'Confirmed', 'Cancelled']
+console.log(TripStatus.values());           // ['saved', 'confirmed', 'cancelled']
+console.log(TripStatus.options);            // [{ value: 'saved', label: 'Trip Saved' }, ...]
 
 // Use in conditionals
-if (order.status === TripStatus.Confirmed.value) {
-    // Handle confirmed order
+if (trip.status === TripStatus.Confirmed.value) {
+    // Handle confirmed trip
 }
 ```
 
 ## Features
 
-### Direct Import Support
+- **Direct imports** - Import enums directly without setup boilerplate
+- **Auto-regeneration** - Automatic updates during development with Vite Wayfinder
+- **Attributes** - `@Label`, `@TranslatedLabel`, `@Meta`, `@ExportMethod` for rich enum data
+- **Multi-locale** - Built-in translation support for international apps
+- **TypeScript integration** - Strict definitions with IntelliSense support
+- **Method export** - Export computed properties and business logic
 
-✨ **New in v2**: Import enums directly without setup boilerplate!
-
-```typescript
-// Just one import - no setup required
-import { TripStatus } from '@/enums/TripStatus';
-```
-
-### Vite Wayfinder Integration
-
-🔥 **Automatic regeneration** during development using Laravel's Vite Wayfinder:
-
-- **Watches enum files** - Auto-regenerates when you change PHP enums
-- **Watches translations** - Updates when you change `lang/*/enums.php` files  
-- **File pattern matching** - Precise control over what triggers regeneration
-- **Official Laravel plugin** - Built and maintained by the Laravel team
-
-```javascript
-// vite.config.js - Configure file patterns to watch
-wayfinder({
-  command: 'php artisan enums:export',
-  patterns: [
-    'app/Enums/**/*.php',
-    'lang/*/enums.php'
-  ],
-})
-```
-
-### Attributes
-
-- **`@Label`**: Custom display labels for enum cases
-- **`@TranslatedLabel`**: Translation-based labels with multi-locale support
-- **`@Meta`**: Arbitrary metadata (colors, icons, descriptions, etc.)
-- **`@ExportMethod`**: Export method results as static properties in TypeScript
-
-### Label Resolution
-
-Labels are resolved in this priority order:
-
-1. `@TranslatedLabel` attribute on the enum case
-2. `@Label` attribute on the enum case
-3. Translation from `lang/en/enums.php` using `enums.{EnumName}.{CaseName}`
-4. The enum case name as fallback
-
-### TypeScript Integration
-
-- Strict TypeScript definitions with literal unions
-- IntelliSense support for all enum properties
-- Proxy-based API for natural enum access
-- Support for both backed and pure enums
-
-### CLI Commands
+## Commands
 
 ```bash
-# Export enums to TypeScript files
-php artisan enums:export
-
-# Export for specific locale
-php artisan enums:export --locale=es
-
-# Export all locales at once  
-php artisan enums:export-all-locales
-
-# Watch for changes (alternative to Vite Wayfinder)
-php artisan enums:watch
-
-# Discover enums (always fresh - no caching)
-php artisan enums:discover
+php artisan enums:export              # Export enums
+php artisan enums:export --locale=es  # Export specific locale
+php artisan enums:export-all-locales  # Export all locales
+php artisan enums:watch               # Watch for changes
+php artisan enums:discover            # Discover enums
 ```
 
-## Translation Support
+## Translations
 
 ### TranslatedLabel Attribute
 
@@ -331,9 +233,9 @@ return [
 }
 ```
 
-## Custom Method Export
+## Method Export
 
-Export method results as static properties using the `@ExportMethod` attribute. This allows you to include computed properties and business logic in your frontend enums.
+Export method results as static properties with `@ExportMethod`:
 
 ### Basic Usage
 
@@ -522,7 +424,7 @@ enum UserRole: string
 
 ## Auto-Discovery
 
-Instead of manually configuring each enum, you can enable auto-discovery to automatically find and register enums:
+Automatically find and register enums:
 
 ### Enable Auto-Discovery
 
