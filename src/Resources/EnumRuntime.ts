@@ -39,9 +39,6 @@ export type EnumObject<
     values(): readonly (V | K)[];
     labels(locale?: string): readonly string[];
     from(value: V | K | null | undefined): EnumEntry<K, V | null, M, X> | null;
-    tryFrom(value: unknown): EnumEntry<K, V | null, M, X> | null;
-    hasKey(key: unknown): key is K;
-    hasValue(val: unknown): val is V | K;
   } & { [P in K]: EnumEntry<K, V | null, M, X> }
 >;
 
@@ -114,36 +111,12 @@ export function buildEnum<T extends Record<string, any>>(
       if (value == null) return null;
       return byValue.get(value) ?? null;
     },
-    tryFrom(value: unknown) {
-      if (byValue.has(value)) return byValue.get(value)!;
-      if (typeof value === 'string') {
-        if (byKey.has(value)) return byKey.get(value)!;
-        const n = Number(value);
-        if (!Number.isNaN(n) && byValue.has(n)) return byValue.get(n)!;
-      }
-      return null;
-    },
-    hasKey(k: unknown) {
-      return typeof k === 'string' && byKey.has(k);
-    },
-    hasValue(v: unknown) {
-      return byValue.has(v);
-    },
   } as const;
 
   const full = Object.assign(obj, api);
   return Object.freeze(full) as any;
 }
 
-// Legacy compatibility functions
-export function createEnumProxy<
-  const K extends string,
-  const V extends Backing,
-  const M extends Record<string, unknown> = Record<string, unknown>,
-  const X extends Record<string, unknown> = {}
->(enumData: EnumData<K, V, M, X>): EnumObject<K, V, M, X> {
-  return buildEnum(enumData);
-}
 
 export function buildEnums<
   const K extends string,
@@ -162,4 +135,3 @@ export function buildEnums<
   return enums;
 }
 
-export default buildEnums;
