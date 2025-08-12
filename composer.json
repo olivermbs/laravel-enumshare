@@ -37,8 +37,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Olivermbs\\LaravelEnumshare\\": "src/",
-            "Olivermbs\\LaravelEnumshare\\Database\\Factories\\": "database/factories/"
+            "Olivermbs\\LaravelEnumshare\\": "src/"
         }
     },
     "autoload-dev": {
