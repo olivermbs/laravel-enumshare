@@ -34,8 +34,6 @@ class EnumsWatchCommand extends Command
             }
             sleep($interval);
         }
-
-        return self::SUCCESS;
     }
 
     protected function hasChanges(): bool
@@ -136,6 +134,6 @@ class EnumsWatchCommand extends Command
 
     protected function export(EnumRegistry $registry): void
     {
-        $this->call('enums:export', [], $this->output);
+        $this->call('enums:export');
     }
 }
