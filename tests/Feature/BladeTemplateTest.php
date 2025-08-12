@@ -43,7 +43,7 @@ it('generates typescript from blade template', function () {
     expect($output)->toContain('fromKey(key:');
     expect($output)->not->toContain('EnumRuntime');
 
-    // Verify it's valid TypeScript structure  
+    // Verify it's valid TypeScript structure
     expect($output)->toContain('as const'); // Uses const assertions
 
     // Check JSDoc comments are present

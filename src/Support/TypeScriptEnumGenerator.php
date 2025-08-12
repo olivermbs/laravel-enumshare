@@ -44,13 +44,13 @@ class TypeScriptEnumGenerator
 
         $parts[] = '// This file is auto-generated. Do not edit manually.';
         $parts[] = '';
-        
+
         if ($exportTypes) {
             $parts[] = $this->generateMetaType($enumName, $metaTypes);
             $parts[] = $this->generateEntryType($enumName, $entries, $backingType, $labelAnalysis['unionType']);
             $parts[] = $this->generateOptionType($enumName, $backingType);
         }
-        
+
         $parts[] = $this->generateEntriesConstant($enumName, $entries, $backingType, $labelAnalysis['isMultilingual']);
         $parts[] = $this->generateLabelHelper($labelAnalysis['isMultilingual']);
         $parts[] = $this->generateMainEnumObject($enumName, $fqcn, $backingType, $entries, $labelAnalysis['isMultilingual'], $exportTypes);
@@ -108,7 +108,7 @@ class TypeScriptEnumGenerator
 
     protected function generateEntriesConstant(string $enumName, array $entries, ?string $backingType, bool $isMultilingual): string
     {
-        $lines = ["const ENTRIES = ["];
+        $lines = ['const ENTRIES = ['];
 
         foreach ($entries as $entry) {
             $lines[] = '  {';
@@ -156,7 +156,6 @@ class TypeScriptEnumGenerator
 
         return implode("\n", $lines);
     }
-
 
     protected function generateMainEnumObject(string $enumName, string $fqcn, ?string $backingType, array $entries, bool $isMultilingual, bool $exportTypes = false): string
     {
@@ -215,7 +214,7 @@ class TypeScriptEnumGenerator
 
         // Constants already declared in generateEntriesConstant - no duplication needed
         $lines[] = '';
-        
+
         if ($exportTypes) {
             $lines[] = '// Exported types for external use';
             $lines[] = "export type {$enumName}Key = typeof ENTRIES[number]['key'];";
@@ -260,7 +259,6 @@ class TypeScriptEnumGenerator
         return implode("\n", $lines);
     }
 
-
     protected function generateLabelHelper(bool $isMultilingual): string
     {
         if (! $isMultilingual) {
@@ -301,7 +299,7 @@ class TypeScriptEnumGenerator
             $lines[] = "    const v = value as {$enumName}Value;";
             $lines[] = '    return BY_VALUE.get(v) ?? null;';
         } else {
-            $lines[] = "  from(value: string | null | undefined): typeof ENTRIES[number] | null {";
+            $lines[] = '  from(value: string | null | undefined): typeof ENTRIES[number] | null {';
             $lines[] = '    if (value == null) return null;';
             $lines[] = "    const k = value as {$enumName}Key;";
             $lines[] = '    return BY_KEY.get(k) ?? null;';
@@ -314,7 +312,7 @@ class TypeScriptEnumGenerator
         $lines[] = '   * @param key - The key to search for';
         $lines[] = '   * @returns The matching enum entry or null if not found';
         $lines[] = '   */';
-        $lines[] = "  fromKey(key: string | null | undefined): typeof ENTRIES[number] | null {";
+        $lines[] = '  fromKey(key: string | null | undefined): typeof ENTRIES[number] | null {';
         $lines[] = '    if (key == null) return null;';
         $lines[] = "    const k = key as {$enumName}Key;";
         $lines[] = '    return BY_KEY.get(k) ?? null;';
