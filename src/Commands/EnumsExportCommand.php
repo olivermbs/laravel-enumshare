@@ -56,7 +56,6 @@ class EnumsExportCommand extends Command
         }
     }
 
-
     protected function generateIndividualEnumFile(string $enumName, array $enumData): string
     {
         // Ensure meta properties are objects, not arrays

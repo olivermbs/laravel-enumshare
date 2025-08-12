@@ -6,7 +6,7 @@ use Olivermbs\LaravelEnumshare\LaravelEnumshareServiceProvider;
 it('generates typescript from blade template', function () {
     // Register the service provider to load views
     $this->app->register(LaravelEnumshareServiceProvider::class);
-    
+
     $enumData = [
         'name' => 'TestStatus',
         'fqcn' => 'Tests\\TestStatus',
@@ -21,18 +21,18 @@ it('generates typescript from blade template', function () {
             [
                 'key' => 'Pending',
                 'value' => 'pending',
-                'label' => 'Pending Status', 
+                'label' => 'Pending Status',
                 'meta' => ['color' => 'yellow', 'icon' => 'clock'],
-            ]
+            ],
         ],
         'options' => [
             ['value' => 'active', 'label' => 'Active Status'],
-            ['value' => 'pending', 'label' => 'Pending Status']
-        ]
+            ['value' => 'pending', 'label' => 'Pending Status'],
+        ],
     ];
 
     $output = View::make('enumshare::enum', $enumData)->render();
-    
+
     // Check basic structure
     expect($output)->toContain('export type TestStatus');
     expect($output)->toContain('export const TestStatus');
@@ -41,14 +41,14 @@ it('generates typescript from blade template', function () {
     expect($output)->toContain('from(value:');
     expect($output)->toContain('fromKey(key:');
     expect($output)->not->toContain('EnumRuntime');
-    
+
     // Verify it's valid TypeScript structure
     expect($output)->toContain('} as const;');
-    
+
     // Check JSDoc comments are present
     expect($output)->toContain('/**');
     expect($output)->toContain(' * TestStatus enum generated from');
-    
+
     // Check new utility methods
     expect($output)->toContain('isValid(value: unknown): boolean');
     expect($output)->toContain('random(): TestStatusEntry');
