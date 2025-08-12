@@ -68,8 +68,8 @@ class EnumsWatchCommand extends Command
         $files = [];
 
         // Watch enum files from autodiscovery paths
-        if (config('enumshare.autodiscovery.enabled')) {
-            foreach (config('enumshare.autodiscovery.paths', []) as $path) {
+        if (config('enumshare.auto_discovery')) {
+            foreach (config('enumshare.auto_paths', []) as $path) {
                 $fullPath = base_path($path);
                 if (File::isDirectory($fullPath)) {
                     $files = array_merge($files, $this->getPhpFiles($fullPath));

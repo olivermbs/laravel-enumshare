@@ -104,7 +104,7 @@ class EnumAutoDiscoveryTest extends TestCase
         $registry = new EnumRegistry([], $discovery);
 
         // Enable autodiscovery in config
-        config(['enumshare.autodiscovery.enabled' => true]);
+        config(['enumshare.auto_discovery' => true]);
 
         $manifest = $registry->manifest();
 
@@ -117,12 +117,12 @@ class EnumAutoDiscoveryTest extends TestCase
         $this->createTestEnumFile('DiscoveredEnum', 'App\\Enums');
 
         // Create a configured enum (defined in test)
-        $configuredEnums = [TestConfiguredEnum::class];
+        $configuredEnums = [\TestConfiguredEnum::class];
 
         $discovery = new EnumAutoDiscovery(['test_enums']);
         $registry = new EnumRegistry($configuredEnums, $discovery);
 
-        config(['enumshare.autodiscovery.enabled' => true]);
+        config(['enumshare.auto_discovery' => true]);
 
         $manifest = $registry->manifest();
 

@@ -173,7 +173,7 @@ class EnumExportTest extends TestCase
         file_put_contents(__DIR__.'/lang/fr/orders.php', "<?php return ['pending' => 'Commande en attente'];");
         file_put_contents(__DIR__.'/lang/es/orders.php', "<?php return ['pending' => 'Pedido pendiente'];");
 
-        config(['enumshare.export.locales' => ['en', 'fr', 'es']]);
+        config(['enumshare.locales' => ['en', 'fr', 'es']]);
 
         $result = OrderStatus::forFrontend();
         $pendingEntry = collect($result['entries'])->firstWhere('key', 'Pending');
@@ -202,7 +202,7 @@ class EnumExportTest extends TestCase
         }
         file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['confirmed' => 'Confirmed :status Order'];");
 
-        config(['enumshare.export.locales' => ['en']]);
+        config(['enumshare.locales' => ['en']]);
 
         $result = OrderStatus::forFrontend();
         $confirmedEntry = collect($result['entries'])->firstWhere('key', 'Confirmed');
@@ -227,7 +227,7 @@ class EnumExportTest extends TestCase
         file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
 
         config(['app.locale' => 'en']);
-        config(['enumshare.export.locales' => []]);
+        config(['enumshare.locales' => []]);
 
         $result = OrderStatus::forFrontend();
         $pendingEntry = collect($result['entries'])->firstWhere('key', 'Pending');
@@ -249,7 +249,7 @@ class EnumExportTest extends TestCase
         }
         file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
 
-        config(['enumshare.export.locales' => ['en']]);
+        config(['enumshare.locales' => ['en']]);
 
         $result = OrderStatus::forFrontend();
         $pendingEntry = collect($result['entries'])->firstWhere('key', 'Pending');
@@ -276,7 +276,7 @@ class EnumExportTest extends TestCase
         file_put_contents(__DIR__.'/lang/en/orders.php', "<?php return ['pending' => 'Pending Order'];");
 
         config(['app.locale' => 'en']);
-        config(['enumshare.export.locales' => ['en']]);
+        config(['enumshare.locales' => ['en']]);
 
         $result = OrderStatus::forFrontend();
         $pendingOption = collect($result['options'])->firstWhere('value', 'pending');

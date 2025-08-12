@@ -42,7 +42,7 @@ class EnumCommandsTest extends TestCase
 
     public function test_enums_discover_command_fails_when_disabled(): void
     {
-        config(['enumshare.autodiscovery.enabled' => false]);
+        config(['enumshare.auto_discovery' => false]);
 
         $this->artisan('enums:discover')
             ->expectsOutput('Enum autodiscovery is not enabled. Enable it in config/enumshare.php')
@@ -76,8 +76,8 @@ class EnumCommandsTest extends TestCase
         $enumContent = File::get($tempDir.'/CommandTestEnum.ts');
         expect($enumContent)
             ->toContain('export const CommandTestEnum')
-            ->toContain('keys()')
-            ->toContain('values()')
+            ->toContain('keys: KEYS,')
+            ->toContain('values: VALUES,')
             ->toContain('from(');
 
         // Clean up
@@ -110,15 +110,7 @@ enum CommandTestEnum: string
     {
         parent::getEnvironmentSetUp($app);
 
-        $app['config']->set('enumshare.autodiscovery', [
-            'enabled' => true,
-            'paths' => ['test_enums'],
-            'namespaces' => ['App\\Enums\\*'],
-            'cache' => [
-                'enabled' => false,
-                'key' => 'test.discovered_enums',
-                'ttl' => 3600,
-            ],
-        ]);
+        $app['config']->set('enumshare.auto_discovery', true);
+        $app['config']->set('enumshare.auto_paths', ['test_enums']);
     }
 }

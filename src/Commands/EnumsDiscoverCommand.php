@@ -13,14 +13,14 @@ class EnumsDiscoverCommand extends Command
 
     public function handle(): int
     {
-        if (! config('enumshare.autodiscovery.enabled', false)) {
+        if (! config('enumshare.auto_discovery', false)) {
             $this->error('Enum autodiscovery is not enabled. Enable it in config/enumshare.php');
 
             return self::FAILURE;
         }
 
         $discovery = new EnumAutoDiscovery(
-            config('enumshare.autodiscovery.paths', [])
+            config('enumshare.auto_paths', [])
         );
 
         $this->info('Discovering enums...');

@@ -26,7 +26,7 @@ trait SharesWithFrontend
             $backingType = is_string($firstCase->value) ? 'string' : 'int';
         }
 
-        $configuredLocales = config('enumshare.export.locales', []);
+        $configuredLocales = config('enumshare.locales', []);
 
         $entries = [];
         $options = [];

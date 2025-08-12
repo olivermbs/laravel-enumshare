@@ -9,7 +9,8 @@ class EnumRegistry
 {
     public function __construct(
         protected array $enums = [],
-        protected ?EnumAutoDiscovery $autoDiscovery = null
+        protected ?EnumAutoDiscovery $autoDiscovery = null,
+        protected ?EnumValidator $validator = null
     ) {}
 
     public function manifest(?string $locale = null): array
@@ -33,9 +34,13 @@ class EnumRegistry
 
     protected function getAllEnums(): array
     {
-        $configuredEnums = $this->enums;
-        $discoveredEnums = [];
+        // Always merge constructor enums with config enums
+        $configuredEnums = array_merge(
+            $this->enums,
+            config('enumshare.enums', [])
+        );
 
+        $discoveredEnums = [];
         if ($this->autoDiscovery && $this->isAutoDiscoveryEnabled()) {
             $discoveredEnums = $this->autoDiscovery->discover();
         }
@@ -45,11 +50,16 @@ class EnumRegistry
 
     protected function isAutoDiscoveryEnabled(): bool
     {
-        return config('enumshare.autodiscovery.enabled', false);
+        return config('enumshare.auto_discovery', false);
     }
 
     protected function isValidEnum(string $enumClass): bool
     {
+        if ($this->validator) {
+            return $this->validator->isValidEnumForExport($enumClass);
+        }
+
+        // Fallback to basic validation if no validator provided
         if (! class_exists($enumClass)) {
             return false;
         }

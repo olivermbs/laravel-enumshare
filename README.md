@@ -99,8 +99,8 @@ export default defineConfig({
   plugins: [
     // ... other plugins
     wayfinder({
-      command: 'php artisan enums:export',
-      patterns: ['app/Enums/**/*.php', 'lang/*/enums.php'],
+      command: 'php artisan enums:export --force',
+      patterns: ['app/Enums/**/*.php', 'lang/*/enums.php', 'config/enumshare.php'],
     }),
   ],
 });

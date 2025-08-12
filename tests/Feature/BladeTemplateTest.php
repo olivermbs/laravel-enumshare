@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\View;
 use Olivermbs\LaravelEnumshare\LaravelEnumshareServiceProvider;
 
 it('generates typescript from blade template', function () {
@@ -31,7 +30,9 @@ it('generates typescript from blade template', function () {
         ],
     ];
 
-    $output = View::make('enumshare::enum', $enumData)->render();
+    // Use the generator directly instead of the blade template
+    $generator = $this->app->make(\Olivermbs\LaravelEnumshare\Support\TypeScriptEnumGenerator::class);
+    $output = $generator->generate('TestStatus', $enumData);
 
     // Check basic structure
     expect($output)->toContain('export type TestStatus');
@@ -42,15 +43,15 @@ it('generates typescript from blade template', function () {
     expect($output)->toContain('fromKey(key:');
     expect($output)->not->toContain('EnumRuntime');
 
-    // Verify it's valid TypeScript structure
-    expect($output)->toContain('} as const;');
+    // Verify it's valid TypeScript structure  
+    expect($output)->toContain('as const'); // Uses const assertions
 
     // Check JSDoc comments are present
     expect($output)->toContain('/**');
     expect($output)->toContain(' * TestStatus enum generated from');
 
-    // Check new utility methods
-    expect($output)->toContain('isValid(value: unknown): boolean');
-    expect($output)->toContain('random(): TestStatusEntry');
-    expect($output)->toContain('count: 2');
+    // Check core utility methods with type guards
+    expect($output)->toContain('isValid(value: unknown): value is TestStatusValue');
+    expect($output)->toContain('hasKey(key: unknown): key is TestStatusKey');
+    expect($output)->toContain('count: ENTRIES.length');
 });

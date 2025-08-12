@@ -1,81 +1,61 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Enums to Export
     |--------------------------------------------------------------------------
     |
     | List of enum class FQCNs that should be exported to the frontend.
-    | Each enum must implement the FrontendEnum contract and use the
-    | SharesWithFrontend trait.
+    | Each enum must use the SharesWithFrontend trait.
     |
     */
     'enums' => [
-        Tests\TestStatus::class,
         // App\Enums\TripStatus::class,
         // App\Enums\UserRole::class,
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Export Configuration
+    | Export Path
     |--------------------------------------------------------------------------
     |
-    | Configuration for build-time export strategy.
+    | Path where the enum TypeScript files will be written.
     |
     */
-    'export' => [
-        /*
-        | Path where the enum files will be written
-        */
-        'path' => resource_path('js/enums'),
+    'path' => resource_path('js/Enums'),
 
-        /*
-        | Default locale for label generation
-        | Set to null to use app()->getLocale()
-        */
-        'locale' => null,
-
-        /*
-        | Locales to include when generating translations
-        | Used by TranslatedLabel attributes to export all available translations
-        | If empty, will default to just the current/default locale
-        */
-        'locales' => [
-            // 'en',
-            // 'fr',
-            // 'es',
-        ],
+    /*
+    |--------------------------------------------------------------------------
+    | Locales
+    |--------------------------------------------------------------------------
+    |
+    | Default locale and additional locales for translations.
+    | Set locale to null to use app()->getLocale().
+    | Add locales to export multilingual enum labels.
+    |
+    */
+    'locale' => null,
+    'locales' => [
+        // 'en',
+        // 'fr',
+        // 'es',
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Auto-Discovery Configuration
+    | Auto-Discovery
     |--------------------------------------------------------------------------
     |
-    | Enable automatic discovery of enums that implement the FrontendEnum
-    | contract. When enabled, the package will scan specified paths for
-    | enums instead of relying solely on the 'enums' array above.
+    | Automatically discover enums in specified paths.
+    | Scans for enums that use the SharesWithFrontend trait.
     |
     */
-    'autodiscovery' => [
-        /*
-        | Enable or disable enum autodiscovery
-        */
-        'enabled' => env('ENUMSHARE_AUTODISCOVERY', true),
-
-        /*
-        | Paths to scan for enums (relative to base_path())
-        | Uses PSR-4 namespace mapping to discover enums
-        */
-        'paths' => [
-            'app/Enums',
-            // 'app/Models/Enums',
-            // 'src/Domain/*/Enums',
-        ],
-
+    'auto_discovery' => env('ENUMSHARE_AUTODISCOVERY', true),
+    'auto_paths' => [
+        'app/Enums',
+        // 'app/Models/Enums',
+        // 'src/Domain/*/Enums',
     ],
 
     /*
@@ -83,9 +63,8 @@ return [
     | Language Namespace
     |--------------------------------------------------------------------------
     |
-    | The namespace used for automatic label resolution when no Label
-    | attribute is present. Labels will be resolved from:
-    | lang("{namespace}.{EnumShortName}.{CaseName}")
+    | Namespace for automatic label resolution when no Label attribute is present.
+    | Labels resolve from: lang("{namespace}.{EnumShortName}.{CaseName}")
     |
     */
     'lang_namespace' => 'enums',

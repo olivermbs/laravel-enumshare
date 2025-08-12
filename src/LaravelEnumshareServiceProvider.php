@@ -9,6 +9,9 @@ use Olivermbs\LaravelEnumshare\Commands\EnumsExportCommand;
 use Olivermbs\LaravelEnumshare\Commands\EnumsWatchCommand;
 use Olivermbs\LaravelEnumshare\Support\EnumAutoDiscovery;
 use Olivermbs\LaravelEnumshare\Support\EnumRegistry;
+use Olivermbs\LaravelEnumshare\Support\EnumValidator;
+use Olivermbs\LaravelEnumshare\Support\TypeScriptEnumGenerator;
+use Olivermbs\LaravelEnumshare\Support\TypeScriptTypeResolver;
 
 class LaravelEnumshareServiceProvider extends ServiceProvider
 {
@@ -18,16 +21,27 @@ class LaravelEnumshareServiceProvider extends ServiceProvider
             __DIR__.'/../config/enumshare.php', 'enumshare'
         );
 
+        $this->app->singleton(EnumValidator::class);
+
         $this->app->singleton(EnumAutoDiscovery::class, function ($app) {
             return new EnumAutoDiscovery(
-                config('enumshare.autodiscovery.paths', [])
+                config('enumshare.auto_paths', [])
             );
         });
 
         $this->app->singleton(EnumRegistry::class, function ($app) {
             return new EnumRegistry(
                 config('enumshare.enums', []),
-                $app->make(EnumAutoDiscovery::class)
+                $app->make(EnumAutoDiscovery::class),
+                $app->make(EnumValidator::class)
+            );
+        });
+
+        $this->app->singleton(TypeScriptTypeResolver::class);
+
+        $this->app->singleton(TypeScriptEnumGenerator::class, function ($app) {
+            return new TypeScriptEnumGenerator(
+                $app->make(TypeScriptTypeResolver::class)
             );
         });
     }
